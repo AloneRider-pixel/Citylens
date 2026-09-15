@@ -279,21 +279,21 @@ export const LandmarkMapView: React.FC<LandmarkMapViewProps> = ({ recognition })
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${coords.latitude},${coords.longitude}`;
 
   return (
-    <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+    <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden transition-colors">
       {/* Section Header */}
-      <div className="p-4 sm:px-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-slate-50/70">
+      <div className="p-4 sm:px-6 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50/70 dark:bg-slate-950/70">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-slate-900 text-amber-400 flex items-center justify-center shadow-xs">
+          <div className="w-9 h-9 rounded-xl bg-slate-900 dark:bg-slate-800 text-amber-400 flex items-center justify-center shadow-xs">
             <Compass className="w-5 h-5 animate-spin-slow" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-slate-900 text-base">Geographic Map & Exploration Radius</h3>
-              <span className="text-[10px] font-mono bg-amber-500/10 text-amber-800 border border-amber-500/20 px-2 py-0.5 rounded-full font-semibold">
+              <h3 className="font-bold text-slate-900 dark:text-white text-base">Geographic Map & Exploration Radius</h3>
+              <span className="text-[10px] font-mono bg-amber-500/10 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-500/20 dark:border-amber-700/60 px-2 py-0.5 rounded-full font-semibold">
                 500m - 1km Radius
               </span>
             </div>
-            <p className="text-xs text-slate-500 font-mono">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
               {coords.latitude.toFixed(4)}°N, {coords.longitude.toFixed(4)}°E • {recognition.city}, {recognition.country}
             </p>
           </div>
@@ -302,27 +302,27 @@ export const LandmarkMapView: React.FC<LandmarkMapViewProps> = ({ recognition })
         {/* Map Actions */}
         <div className="flex items-center gap-2">
           {/* Map Layer Switcher */}
-          <div className="flex items-center bg-white rounded-lg p-0.5 border border-slate-200 shadow-xs text-xs">
+          <div className="flex items-center bg-white dark:bg-slate-950 rounded-lg p-0.5 border border-slate-200 dark:border-slate-700 shadow-xs text-xs">
             <button
               onClick={() => setMapTheme('dark')}
-              className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors ${
-                mapTheme === 'dark' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900'
+              className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer ${
+                mapTheme === 'dark' ? 'bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-950 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               Cyber Dark
             </button>
             <button
               onClick={() => setMapTheme('light')}
-              className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors ${
-                mapTheme === 'light' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-600 hover:text-slate-900'
+              className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer ${
+                mapTheme === 'light' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               Clean Light
             </button>
             <button
               onClick={() => setMapTheme('street')}
-              className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors ${
-                mapTheme === 'street' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900'
+              className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-colors cursor-pointer ${
+                mapTheme === 'street' ? 'bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-950 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               Street
@@ -332,7 +332,7 @@ export const LandmarkMapView: React.FC<LandmarkMapViewProps> = ({ recognition })
           {/* Recenter Button */}
           <button
             onClick={handleRecenterLandmark}
-            className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 shadow-xs text-xs flex items-center gap-1 transition-colors"
+            className="p-1.5 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 shadow-xs text-xs flex items-center gap-1 transition-colors cursor-pointer"
             title="Recenter Map on Landmark"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -344,10 +344,10 @@ export const LandmarkMapView: React.FC<LandmarkMapViewProps> = ({ recognition })
             href={googleMapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 shadow-xs text-xs flex items-center gap-1 transition-colors"
+            className="p-1.5 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 shadow-xs text-xs flex items-center gap-1 transition-colors"
             title="Open in Google Maps"
           >
-            <ExternalLink className="w-3.5 h-3.5 text-amber-600" />
+            <ExternalLink className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
             <span className="hidden sm:inline text-[11px] font-medium">Open Maps</span>
           </a>
 
@@ -359,7 +359,7 @@ export const LandmarkMapView: React.FC<LandmarkMapViewProps> = ({ recognition })
                 mapInstanceRef.current?.invalidateSize();
               }, 150);
             }}
-            className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 shadow-xs transition-colors"
+            className="p-1.5 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 shadow-xs transition-colors cursor-pointer"
             title={isMapExpanded ? 'Standard view' : 'Enlarge map view'}
           >
             {isMapExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
@@ -368,7 +368,7 @@ export const LandmarkMapView: React.FC<LandmarkMapViewProps> = ({ recognition })
       </div>
 
       {/* Main Map Body: Grid with Map & Nearby POIs */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
+      <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-slate-200 dark:divide-slate-800">
         {/* Left 2 Cols: Interactive Leaflet Map Canvas */}
         <div className="lg:col-span-2 relative">
           <div
@@ -390,11 +390,11 @@ export const LandmarkMapView: React.FC<LandmarkMapViewProps> = ({ recognition })
                 <span className="font-semibold text-white">{recognition.landmarkName}</span>
               </div>
               <div className="flex items-center gap-2 text-slate-400">
-                <span className="w-2 h-2 rounded-full border border-amber-400 border-dashed" />
+                <span className="w-2.5 h-2.5 rounded-full border border-amber-400 border-dashed" />
                 <span>500m Walk Radius</span>
               </div>
               <div className="flex items-center gap-2 text-slate-400">
-                <span className="w-2 h-2 rounded-full border border-cyan-400 border-dashed" />
+                <span className="w-2.5 h-2.5 rounded-full border border-cyan-400 border-dashed" />
                 <span>1km Exploration Radius</span>
               </div>
             </div>
@@ -402,15 +402,15 @@ export const LandmarkMapView: React.FC<LandmarkMapViewProps> = ({ recognition })
         </div>
 
         {/* Right 1 Col: Points of Interest List & Filter Chips */}
-        <div className="flex flex-col h-[380px] sm:h-[420px] bg-slate-50/40">
+        <div className="flex flex-col h-[380px] sm:h-[420px] bg-slate-50/40 dark:bg-slate-950/40">
           {/* POI Filter Chips */}
-          <div className="p-3 border-b border-slate-200 bg-white">
+          <div className="p-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                <Footprints className="w-3.5 h-3.5 text-amber-600" />
+              <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <Footprints className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                 Nearby Attractions ({pois.length})
               </span>
-              <span className="text-[10px] font-mono text-slate-500">
+              <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
                 Sorted by distance
               </span>
             </div>
@@ -420,10 +420,10 @@ export const LandmarkMapView: React.FC<LandmarkMapViewProps> = ({ recognition })
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-2 py-0.5 rounded-md text-[11px] font-medium whitespace-nowrap transition-colors ${
+                  className={`px-2 py-0.5 rounded-md text-[11px] font-medium whitespace-nowrap transition-colors cursor-pointer ${
                     selectedCategory === cat.id
-                      ? 'bg-slate-900 text-white'
-                      : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                      ? 'bg-slate-900 dark:bg-amber-500 text-white dark:text-slate-950 font-semibold'
+                      : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'
                   }`}
                 >
                   {cat.label}
@@ -435,8 +435,8 @@ export const LandmarkMapView: React.FC<LandmarkMapViewProps> = ({ recognition })
           {/* POI Scrollable List */}
           <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
             {filteredPOIs.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-center p-4 text-slate-400">
-                <MapPin className="w-8 h-8 stroke-1 mb-2 text-slate-300" />
+              <div className="h-full flex flex-col items-center justify-center text-center p-4 text-slate-400 dark:text-slate-500">
+                <MapPin className="w-8 h-8 stroke-1 mb-2 text-slate-300 dark:text-slate-600" />
                 <p className="text-xs">No points of interest match this filter category.</p>
               </div>
             ) : (
@@ -451,8 +451,8 @@ export const LandmarkMapView: React.FC<LandmarkMapViewProps> = ({ recognition })
                     onClick={() => handleSelectPOI(poi)}
                     className={`p-3 rounded-xl border transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-amber-50/80 border-amber-400 ring-2 ring-amber-400/20 shadow-xs'
-                        : 'bg-white hover:bg-slate-50 border-slate-200 shadow-2xs'
+                        ? 'bg-amber-50/80 dark:bg-amber-950/40 border-amber-400 dark:border-amber-500 ring-2 ring-amber-400/20 shadow-xs'
+                        : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 border-slate-200 dark:border-slate-800 shadow-2xs'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2 mb-1">
@@ -460,23 +460,23 @@ export const LandmarkMapView: React.FC<LandmarkMapViewProps> = ({ recognition })
                         <span className={`p-1 rounded-md ${meta.color}`}>
                           <IconComponent className="w-3 h-3" />
                         </span>
-                        <h4 className="font-bold text-xs text-slate-900 line-clamp-1">{poi.name}</h4>
+                        <h4 className="font-bold text-xs text-slate-900 dark:text-white line-clamp-1">{poi.name}</h4>
                       </div>
-                      <span className="text-[10px] font-mono font-bold text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded-sm shrink-0">
+                      <span className="text-[10px] font-mono font-bold text-amber-700 dark:text-amber-300 bg-amber-100/80 dark:bg-amber-950/80 border border-amber-300/40 dark:border-amber-800 px-1.5 py-0.5 rounded-sm shrink-0">
                         {poi.distanceMeters} m
                       </span>
                     </div>
 
-                    <p className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed mb-2">
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed mb-2">
                       {poi.shortDescription}
                     </p>
 
-                    <div className="flex items-center justify-between text-[10px] font-medium text-slate-500 pt-1 border-t border-slate-100">
+                    <div className="flex items-center justify-between text-[10px] font-medium text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
                       <span className="flex items-center gap-1">
-                        <Footprints className="w-3 h-3 text-slate-400" />
+                        <Footprints className="w-3 h-3 text-slate-400 dark:text-slate-500" />
                         <span>~{poi.walkingTimeMinutes || Math.round(poi.distanceMeters / 80)} min walk</span>
                       </span>
-                      <span className="text-amber-600 hover:text-amber-700 font-semibold flex items-center gap-0.5">
+                      <span className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-semibold flex items-center gap-0.5">
                         <span>Locate on Map</span>
                         <Navigation className="w-2.5 h-2.5" />
                       </span>

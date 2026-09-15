@@ -10,6 +10,7 @@ import {
   Clock,
   Mic,
   RefreshCw,
+  HardDrive,
 } from 'lucide-react';
 import { AudioNarrationResult } from '../types';
 
@@ -36,6 +37,15 @@ export const NarratedClipPlayer: React.FC<NarratedClipPlayerProps> = ({
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
+
+  // Compute effective audio URL from dataUrl or raw base64 buffer for seamless offline cache playback
+  const effectiveAudioUrl = React.useMemo(() => {
+    if (audioResult?.audioDataUrl) return audioResult.audioDataUrl;
+    if (audioResult?.audioBase64) {
+      return `data:${audioResult.mimeType || 'audio/wav'};base64,${audioResult.audioBase64}`;
+    }
+    return null;
+  }, [audioResult]);
 
   // Split narration text into sentences for synchronized teleprompter
   const sentences = React.useMemo(() => {
@@ -87,7 +97,7 @@ export const NarratedClipPlayer: React.FC<NarratedClipPlayerProps> = ({
 
   const togglePlay = () => {
     const audio = audioRef.current;
-    if (audio && audioResult?.audioDataUrl) {
+    if (audio && effectiveAudioUrl) {
       if (isPlaying) {
         audio.pause();
         setIsPlaying(false);
@@ -164,10 +174,10 @@ export const NarratedClipPlayer: React.FC<NarratedClipPlayerProps> = ({
   return (
     <div className="w-full bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 text-white shadow-xl">
       {/* Hidden audio element */}
-      {audioResult?.audioDataUrl && (
+      {effectiveAudioUrl && (
         <audio
           ref={audioRef}
-          src={audioResult.audioDataUrl}
+          src={effectiveAudioUrl}
           preload="auto"
         />
       )}
@@ -179,13 +189,19 @@ export const NarratedClipPlayer: React.FC<NarratedClipPlayerProps> = ({
             <Radio className={`w-5 h-5 ${isPlaying ? 'animate-pulse text-slate-950' : ''}`} />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-bold text-sm sm:text-base text-white">
                 AR Audio Tour Guide
               </h3>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30">
                 TTS: {audioResult?.voiceName || selectedVoice}
               </span>
+              {effectiveAudioUrl && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <HardDrive className="w-2.5 h-2.5 text-emerald-400" />
+                  <span>Cached Offline</span>
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-400">
               Narrated clip for <span className="text-amber-300 font-semibold">{landmarkName}</span>

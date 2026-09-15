@@ -120,6 +120,10 @@ export interface SavedTour {
   recognition: LandmarkRecognitionResult;
   history: LandmarkHistoryResult;
   audioNarration?: AudioNarrationResult;
+  visitCount?: number; // Total visits recorded (1 = initial discovery, 2+ = revisited)
+  lastVisitedAt?: number;
+  isCachedOffline?: boolean;
+  cachedAt?: number;
 }
 
 export type ProcessingStep = 'idle' | 'recognizing' | 'fetching_history' | 'generating_audio' | 'completed' | 'error';

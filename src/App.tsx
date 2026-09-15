@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { AlertTriangle, RefreshCw, Sparkles, MapPin } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Sparkles, MapPin, WifiOff, HardDrive } from 'lucide-react';
 import { Header } from './components/Header';
 import { PhotoUploader } from './components/PhotoUploader';
 import { ScanningOverlay } from './components/ScanningOverlay';
@@ -18,6 +18,8 @@ import { CameraCaptureModal } from './components/CameraCaptureModal';
 import { TravelPassportModal } from './components/TravelPassportModal';
 import { ShareTourModal } from './components/ShareTourModal';
 import { SAMPLE_LANDMARKS } from './data/sampleLandmarks';
+import { tourCacheDB } from './services/tourCacheDB';
+import { isOnline, subscribeToNetworkChanges } from './serviceWorkerRegistration';
 import {
   recognizeLandmark,
   fetchLandmarkHistory,
@@ -51,6 +53,7 @@ export default function App() {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isPassportOpen, setIsPassportOpen] = useState(false);
   const [savedTours, setSavedTours] = useState<SavedTour[]>([]);
+  const [isOffline, setIsOffline] = useState<boolean>(() => !isOnline());
 
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [currentFilter, setCurrentFilter] = useState<ARFilterMode>('normal');
@@ -60,16 +63,38 @@ export default function App() {
     history: LandmarkHistoryResult;
   } | null>(null);
 
-  // Load saved tours from local storage on mount
+  // Monitor online / offline network connectivity
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (stored) {
-        setSavedTours(JSON.parse(stored));
+    setIsOffline(!isOnline());
+    const unsubscribe = subscribeToNetworkChanges((online) => {
+      setIsOffline(!online);
+    });
+    return unsubscribe;
+  }, []);
+
+  // Load saved tours and cached narration audio from IndexedDB on mount
+  useEffect(() => {
+    let isMounted = true;
+    const loadCachedTours = async () => {
+      try {
+        const cached = await tourCacheDB.getAllTours();
+        if (isMounted && cached && cached.length > 0) {
+          setSavedTours(cached);
+        }
+      } catch (e) {
+        console.warn('Failed to load saved tours from IndexedDB, using localStorage fallback', e);
+        try {
+          const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+          if (isMounted && stored) {
+            setSavedTours(JSON.parse(stored));
+          }
+        } catch {}
       }
-    } catch (e) {
-      console.warn('Failed to load saved tours from local storage', e);
-    }
+    };
+    loadCachedTours();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Check URL query parameters for shared links (e.g. ?landmark=Eiffel+Tower)
@@ -92,13 +117,16 @@ export default function App() {
     }
   }, []);
 
-  // Save tours to local storage
-  const persistTours = (tours: SavedTour[]) => {
+  // Save tours to IndexedDB cache with localStorage backup
+  const persistTours = async (tours: SavedTour[]) => {
     setSavedTours(tours);
     try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tours));
+      // Save full tour and audio to IndexedDB
+      if (tours.length > 0) {
+        await tourCacheDB.saveTour(tours[0]);
+      }
     } catch (e) {
-      console.warn('Failed to persist tours', e);
+      console.warn('Failed to persist tour to IndexedDB:', e);
     }
   };
 
@@ -148,17 +176,45 @@ export default function App() {
 
       setProcessingStep('completed');
 
-      // Add to Travel Passport
-      const newTour: SavedTour = {
-        id: `tour-${Date.now()}`,
-        timestamp: Date.now(),
-        image: imageBase64,
-        recognition: recResult,
-        history: histResult,
-        audioNarration: audioResult,
-      };
+      // Add or update entry in Travel Passport with Revisit tracking
+      const landmarkKey = recResult.landmarkName.toLowerCase().trim();
+      const existingTourIndex = savedTours.findIndex(
+        (t) => t.recognition.landmarkName.toLowerCase().trim() === landmarkKey
+      );
 
-      persistTours([newTour, ...savedTours]);
+      let updatedTours: SavedTour[];
+      if (existingTourIndex >= 0) {
+        const existing = savedTours[existingTourIndex];
+        const newVisitCount = (existing.visitCount || 1) + 1;
+        const updatedTour: SavedTour = {
+          ...existing,
+          lastVisitedAt: Date.now(),
+          visitCount: newVisitCount,
+          image: imageBase64, // Keep most recent photo capture
+          recognition: recResult,
+          history: histResult,
+          audioNarration: audioResult,
+        };
+        // Place updated tour at top of passport
+        updatedTours = [
+          updatedTour,
+          ...savedTours.filter((_, idx) => idx !== existingTourIndex),
+        ];
+      } else {
+        const newTour: SavedTour = {
+          id: `tour-${Date.now()}`,
+          timestamp: Date.now(),
+          lastVisitedAt: Date.now(),
+          visitCount: 1,
+          image: imageBase64,
+          recognition: recResult,
+          history: histResult,
+          audioNarration: audioResult,
+        };
+        updatedTours = [newTour, ...savedTours];
+      }
+
+      persistTours(updatedTours);
 
       // Celebrate discovery with confetti
       try {
@@ -194,6 +250,20 @@ export default function App() {
     }
   };
 
+  const handleIncrementVisit = (id: string) => {
+    const updated = savedTours.map((t) => {
+      if (t.id === id) {
+        return {
+          ...t,
+          visitCount: (t.visitCount || 1) + 1,
+          lastVisitedAt: Date.now(),
+        };
+      }
+      return t;
+    });
+    persistTours(updated);
+  };
+
   const handleSelectTourFromPassport = (tour: SavedTour) => {
     setActiveImage(tour.image);
     setRecognition(tour.recognition);
@@ -201,16 +271,28 @@ export default function App() {
     setAudioNarration(tour.audioNarration || null);
     setActivePointId(null);
     setProcessingStep('completed');
+    // Increment revisit count when re-launching tour from passport
+    handleIncrementVisit(tour.id);
   };
 
-  const handleDeleteTour = (id: string) => {
+  const handleDeleteTour = async (id: string) => {
     const filtered = savedTours.filter((t) => t.id !== id);
-    persistTours(filtered);
+    setSavedTours(filtered);
+    try {
+      await tourCacheDB.deleteTour(id);
+    } catch (e) {
+      console.warn('Failed to delete tour from cache:', e);
+    }
   };
 
-  const handleClearAllTours = () => {
+  const handleClearAllTours = async () => {
     if (confirm('Clear all entries from your Traveler Passport?')) {
-      persistTours([]);
+      setSavedTours([]);
+      try {
+        await tourCacheDB.clearAll();
+      } catch (e) {
+        console.warn('Failed to clear cache:', e);
+      }
     }
   };
 
@@ -225,7 +307,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
       {/* App Header */}
       <Header
         selectedVoice={selectedVoice}
@@ -234,11 +316,23 @@ export default function App() {
         onOpenPassport={() => setIsPassportOpen(true)}
         onNewScan={handleResetToNewScan}
         hasActiveLandmark={Boolean(activeImage && processingStep === 'completed')}
+        isOffline={isOffline}
         onOpenShare={() => {
           setTourToShare(null);
           setIsShareModalOpen(true);
         }}
       />
+
+      {/* Offline Status Alert Banner */}
+      {isOffline && (
+        <div className="bg-amber-500/10 dark:bg-amber-950/40 border-b border-amber-500/20 dark:border-amber-800/50 px-4 py-2.5 text-center text-xs text-amber-900 dark:text-amber-200 flex items-center justify-center gap-2">
+          <WifiOff className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
+          <span className="font-bold">Offline Field Mode Active:</span>
+          <span>
+            You are exploring offline. Your saved landmarks, historical timelines, and voice narrations are loaded from IndexedDB.
+          </span>
+        </div>
+      )}
 
       {/* Main Content Area */}
       <main className="flex-1 pb-16">
@@ -247,6 +341,9 @@ export default function App() {
           <PhotoUploader
             onPhotoSelected={handlePhotoSelected}
             onOpenCamera={() => setIsCameraOpen(true)}
+            onOpenPassport={() => setIsPassportOpen(true)}
+            savedToursCount={savedTours.length}
+            isOffline={isOffline}
           />
         )}
 
@@ -263,12 +360,12 @@ export default function App() {
 
         {/* State 3: Error Banner */}
         {processingStep === 'error' && (
-          <div className="max-w-2xl mx-auto mt-12 p-6 bg-white border border-rose-200 rounded-2xl shadow-sm text-center">
-            <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3">
+          <div className="max-w-2xl mx-auto mt-12 p-6 bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-900/60 rounded-2xl shadow-sm text-center">
+            <div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/80 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto mb-3">
               <AlertTriangle className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-1">Analysis Notice</h3>
-            <p className="text-sm text-slate-600 mb-6 max-w-md mx-auto">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Analysis Notice</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-300 mb-6 max-w-md mx-auto">
               {errorMessage || 'Unable to complete landmark recognition and search grounding.'}
             </p>
             <div className="flex items-center justify-center gap-3">
@@ -351,6 +448,7 @@ export default function App() {
         onSelectTour={handleSelectTourFromPassport}
         onDeleteTour={handleDeleteTour}
         onClearAll={handleClearAllTours}
+        onIncrementVisit={handleIncrementVisit}
         onShareTour={(tour) => {
           setTourToShare(tour);
           setIsShareModalOpen(true);

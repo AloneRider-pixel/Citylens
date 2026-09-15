@@ -1,0 +1,17 @@
+{
+  "name": "CityLens AR: Landmark Recognition & Tour",
+  "short_name": "CityLens AR",
+  "description": "Multimodal Urban Tourism AR Companion with Offline Cached Tours and Narration",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -19,8 +19,10 @@ import {
   RefreshCw,
   SunMedium,
   Zap,
+  Glasses,
 } from 'lucide-react';
 import { KeyFocalPoint, LandmarkRecognitionResult } from '../types';
+import { VRPanoramaViewer } from './VRPanoramaViewer';
 
 export type ARFilterMode =
   | 'normal'
@@ -126,6 +128,7 @@ export const ARViewfinder: React.FC<ARViewfinderProps> = ({
   const [showLaser, setShowLaser] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [isVRViewActive, setIsVRViewActive] = useState<boolean>(false);
 
   const activeFilterMode = externalFilter || internalFilter;
 
@@ -216,6 +219,20 @@ export const ARViewfinder: React.FC<ARViewfinderProps> = ({
     }
   };
 
+  // When VR Mode is activated, render the full 360-degree DeviceOrientation environment
+  if (isVRViewActive) {
+    return (
+      <VRPanoramaViewer
+        imageSrc={imageSrc}
+        recognition={recognition}
+        activePointId={activePointId}
+        onSelectPoint={onSelectPoint}
+        onExitVR={() => setIsVRViewActive(false)}
+        filterStyle={getImageFilterStyle()}
+      />
+    );
+  }
+
   return (
     <div className="relative w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl">
       {/* Hidden SVG Filters for Authentic Watercolor Displacement */}
@@ -244,6 +261,17 @@ export const ARViewfinder: React.FC<ARViewfinderProps> = ({
 
         {/* Action controls & AR Filter Toggle Button */}
         <div className="flex items-center gap-2">
+          {/* VR View 360° Toggle */}
+          <button
+            id="vr-view-toggle-btn"
+            onClick={() => setIsVRViewActive(true)}
+            className="px-2.5 py-1 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-all bg-gradient-to-r from-amber-500/20 to-amber-600/20 hover:from-amber-500/30 hover:to-amber-600/30 border-amber-400/80 text-amber-300 shadow-xs cursor-pointer"
+            title="Launch 360° VR View using DeviceOrientation sensor & 3D geometry"
+          >
+            <Glasses className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+            <span>VR View (360°)</span>
+          </button>
+
           {/* Main Filter Toggle Trigger */}
           <button
             id="ar-filter-toggle-btn"
