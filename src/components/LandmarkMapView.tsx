@@ -334,6 +334,7 @@ export const LandmarkMapView: React.FC<LandmarkMapViewProps> = ({ recognition })
             onClick={handleRecenterLandmark}
             className="p-1.5 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 shadow-xs text-xs flex items-center gap-1 transition-colors cursor-pointer"
             title="Recenter Map on Landmark"
+            aria-label="Recenter Map on Landmark"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span className="hidden sm:inline text-[11px] font-medium">Recenter</span>
@@ -361,6 +362,7 @@ export const LandmarkMapView: React.FC<LandmarkMapViewProps> = ({ recognition })
             }}
             className="p-1.5 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 shadow-xs transition-colors cursor-pointer"
             title={isMapExpanded ? 'Standard view' : 'Enlarge map view'}
+            aria-label={isMapExpanded ? 'Standard view' : 'Enlarge map view'}
           >
             {isMapExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
           </button>
