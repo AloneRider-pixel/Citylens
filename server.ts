@@ -205,8 +205,9 @@ CRITICAL:
     res.json(resultJson);
   } catch (error: any) {
     console.error('Error in /api/recognize:', error);
+    // Security enhancement: Do not leak error.message containing internal state or API details to client
     res.status(500).json({
-      error: error.message || 'Failed to recognize landmark',
+      error: 'Failed to recognize landmark',
     });
   }
 });
@@ -296,8 +297,9 @@ Return ONLY valid JSON matching this schema:
     res.json(parsedData);
   } catch (error: any) {
     console.error('Error in /api/history:', error);
+    // Security enhancement: Do not leak error.message containing internal state or API details to client
     res.status(500).json({
-      error: error.message || 'Failed to fetch landmark history',
+      error: 'Failed to fetch landmark history',
     });
   }
 });
@@ -358,8 +360,9 @@ app.post('/api/tts', async (req, res) => {
     });
   } catch (error: any) {
     console.error('Error in /api/tts:', error);
+    // Security enhancement: Do not leak error.message containing internal state or API details to client
     res.status(500).json({
-      error: error.message || 'Failed to synthesize speech',
+      error: 'Failed to synthesize speech',
     });
   }
 });
@@ -676,7 +679,8 @@ Return ONLY valid JSON with this exact schema:
     res.json(quizJson);
   } catch (error: any) {
     console.error('Error in /api/quiz:', error);
-    res.status(500).json({ error: error.message || 'Failed to generate landmark quiz' });
+    // Security enhancement: Do not leak error.message containing internal state or API details to client
+    res.status(500).json({ error: 'Failed to generate landmark quiz' });
   }
 });
 
