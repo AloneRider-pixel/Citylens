@@ -1,0 +1,6 @@
+{
+  "name": "CityLens AR: Landmark Recognition & Tour",
+  "description": "Snap or upload city photos to recognize landmarks with Gemini Pro, fetch verified history via Google Search grounding, and experience an interactive AR narrated audio tour.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
