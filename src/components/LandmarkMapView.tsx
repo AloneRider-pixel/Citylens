@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
@@ -60,9 +60,11 @@ export const LandmarkMapView: React.FC<LandmarkMapViewProps> = ({ recognition })
   const coords = recognition.coordinatesEstimate || { latitude: 48.8584, longitude: 2.2945 };
   const pois = recognition.nearbyPOIs || [];
 
-  const filteredPOIs = selectedCategory === 'all'
-    ? pois
-    : pois.filter((poi) => poi.category === selectedCategory);
+  const filteredPOIs = useMemo(() => {
+    return selectedCategory === 'all'
+      ? pois
+      : pois.filter((poi) => poi.category === selectedCategory);
+  }, [pois, selectedCategory]);
 
   const getCategoryMeta = (category: string) => {
     switch (category) {
@@ -268,13 +270,30 @@ export const LandmarkMapView: React.FC<LandmarkMapViewProps> = ({ recognition })
     });
   };
 
-  const categories = [
-    { id: 'all', label: 'All Sights', count: pois.length },
-    { id: 'viewpoint', label: 'Viewpoints', count: pois.filter((p) => p.category === 'viewpoint').length },
-    { id: 'historic', label: 'Historic', count: pois.filter((p) => p.category === 'historic').length },
-    { id: 'museum', label: 'Museums', count: pois.filter((p) => p.category === 'museum').length },
-    { id: 'park', label: 'Parks & Nature', count: pois.filter((p) => p.category === 'park').length },
-  ].filter((c) => c.id === 'all' || c.count > 0);
+  const categories = useMemo(() => {
+    const counts: Record<string, number> = {
+      viewpoint: 0,
+      historic: 0,
+      museum: 0,
+      park: 0,
+    };
+
+    for (const poi of pois) {
+      if (counts[poi.category] !== undefined) {
+        counts[poi.category]++;
+      } else {
+        counts[poi.category] = 1;
+      }
+    }
+
+    return [
+      { id: 'all', label: 'All Sights', count: pois.length },
+      { id: 'viewpoint', label: 'Viewpoints', count: counts.viewpoint || 0 },
+      { id: 'historic', label: 'Historic', count: counts.historic || 0 },
+      { id: 'museum', label: 'Museums', count: counts.museum || 0 },
+      { id: 'park', label: 'Parks & Nature', count: counts.park || 0 },
+    ].filter((c) => c.id === 'all' || c.count > 0);
+  }, [pois]);
 
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${coords.latitude},${coords.longitude}`;
 
