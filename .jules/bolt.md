@@ -1,0 +1,3 @@
+## 2025-03-01 - Optimization of POI computations in LandmarkMapView
+**Learning:** Iterating through POI categories using `.filter()` for each category (which was done 4 times in `LandmarkMapView.tsx`) is an O(n) operation per filter, adding up. In large data fetches with unmemoized rendering, this triggers O(n) multiple times every re-render.
+**Action:** Replaced multiple `.filter()` calls with a single iteration pass counting categories in `useMemo`. Memoized computations such as `filteredPOIs` inside `useMemo` to prevent these arrays from being reconstructed on every frame render when resizing the map or selecting POIs.
