@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   X,
   BookOpen,
@@ -41,10 +41,24 @@ export const TravelPassportModal: React.FC<TravelPassportModalProps> = ({
   if (!isOpen) return null;
 
   // Calculate stats
-  const uniqueCities = new Set(savedTours.map((t) => t.recognition.city)).size;
-  const uniqueCountries = new Set(savedTours.map((t) => t.recognition.country)).size;
-  const totalVisits = savedTours.reduce((sum, t) => sum + (t.visitCount || 1), 0);
-  const totalRevisits = savedTours.reduce((sum, t) => sum + Math.max(0, (t.visitCount || 1) - 1), 0);
+  const { uniqueCities, uniqueCountries, totalVisits, totalRevisits } = useMemo(() => {
+    let cities = new Set<string>();
+    let countries = new Set<string>();
+    let visits = 0;
+    let revisits = 0;
+    for (const t of savedTours) {
+      cities.add(t.recognition.city);
+      countries.add(t.recognition.country);
+      visits += (t.visitCount || 1);
+      revisits += Math.max(0, (t.visitCount || 1) - 1);
+    }
+    return {
+      uniqueCities: cities.size,
+      uniqueCountries: countries.size,
+      totalVisits: visits,
+      totalRevisits: revisits,
+    };
+  }, [savedTours]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
