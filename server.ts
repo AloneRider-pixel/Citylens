@@ -286,15 +286,15 @@ Return ONLY valid JSON matching this schema:
 
     if (Array.isArray(chunks)) {
       for (const chunk of chunks) {
-        if (chunk.web?.uri) {
+        if (chunk.web&& chunk.web!.uri) {
           try {
-            const urlObj = new URL(chunk.web.uri);
-            const title = chunk.web.title || urlObj.hostname.replace('www.', '');
+            const urlObj = new URL(chunk.web!.uri);
+            const title = chunk.web!.title || urlObj.hostname.replace('www.', '');
             // Avoid duplicate URLs
-            if (!searchSources.some((s) => s.url === chunk.web.uri)) {
+            if (!searchSources.some((s) => s.url === chunk.web!.uri)) {
               searchSources.push({
                 title,
-                url: chunk.web.uri,
+                url: chunk.web!.uri,
               });
             }
           } catch {}
