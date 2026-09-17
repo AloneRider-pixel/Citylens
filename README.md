@@ -42,21 +42,23 @@ Map + exploration UI
 - Request payloads are bounded to prevent unbounded image-body growth.
 - Security headers are applied at the server boundary.
 - Interactive map functionality is separated from the AI recognition path.
+- CI runs deterministic dependency installation, TypeScript checking, and a production build.
+- Dependabot and CodeQL workflows provide ongoing dependency and static-analysis coverage.
 
 ## Local development
 
 ```bash
 cp .env.example .env
 # Add GEMINI_API_KEY to .env
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 Build and type-check:
 
 ```bash
-npm run build
-npm run lint
+pnpm build
+pnpm lint
 ```
 
 ## Environment
@@ -73,13 +75,13 @@ Never commit real API credentials. Use `.env.example` as the configuration templ
 src/
 ├── components/       # UI components
 ├── context/          # application state
-├── data/             # local application data
-├── services/         # external/API services
-├── App.tsx           # application shell
-├── main.tsx          # React entry point
-├── types.ts          # shared TypeScript types
+├── data/              # local application data
+├── services/          # external/API services
+├── App.tsx            # application shell
+├── main.tsx           # React entry point
+├── types.ts           # shared TypeScript types
 └── serviceWorkerRegistration.ts
-server.ts             # Express + Gemini API boundary
+server.ts              # Express + Gemini API boundary
 vite.config.ts
 package.json
 ```
@@ -93,11 +95,11 @@ package.json
 
 ## Roadmap
 
-- Automated unit/integration tests
-- CI build and type-check workflow
-- Better request validation with a runtime schema library
+- Automated unit/integration tests for the API boundary and recognition pipeline
+- Runtime request validation with a schema library
 - API rate limiting and structured request logging
 - Reproducible evaluation set for landmark-recognition quality
+- Optional provider abstraction for additional vision models
 
 ## License
 
