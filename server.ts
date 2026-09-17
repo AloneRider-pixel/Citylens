@@ -21,8 +21,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// Allow payloads up to 25MB for high-resolution city photos
-app.use(express.json({ limit: '25mb' }));
+// Allow payloads up to 25MB only for high-resolution city photos on the recognize endpoint
+app.use('/api/recognize', express.json({ limit: '25mb' }));
+// Security enhancement: Use a strict 100kb limit for all other routes to prevent payload-based DoS attacks
+app.use(express.json({ limit: '100kb' }));
 
 // Initialize GoogleGenAI SDK with required user-agent
 const ai = new GoogleGenAI({
