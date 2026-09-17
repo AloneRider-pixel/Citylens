@@ -1,105 +1,117 @@
 # CityLens
 
+[![CI](https://github.com/AloneRider-pixel/Citylens/actions/workflows/ci.yml/badge.svg)](https://github.com/AloneRider-pixel/Citylens/actions/workflows/ci.yml)
+
 **AI-powered city and landmark exploration web application.**
 
-CityLens uses a React + TypeScript frontend and a Node/Express server to analyze city photos with Google's Gemini API, return structured landmark information, and present nearby points of interest on an interactive map.
+CityLens accepts a city/landmark photo, sends it through a server-side Gemini vision integration, normalizes the result into structured data, and presents the recognition result together with nearby points of interest on an interactive map.
+
+> **Portfolio focus:** React + TypeScript + Node.js + Gemini vision + geospatial UI + PWA engineering.
 
 ## Architecture
 
-```text
-User photo
-   ↓
-React + TypeScript UI
-   ↓
-Express API
-   ↓
-Gemini vision model
-   ↓
-Structured landmark result
-   ├── Landmark metadata
-   ├── Visual focal points
-   ├── Nearby POIs
-   └── Confidence / model metadata
-   ↓
-Map + exploration UI
+```mermaid
+graph LR
+    PHOTO[User Photo]
+    UI[React + TypeScript]
+    API[Express API]
+    GEMINI[Gemini Vision]
+    RESULT[Structured Landmark Result]
+    MAP[Interactive Map + Nearby POIs]
+
+    PHOTO --> UI --> API --> GEMINI --> RESULT --> MAP
 ```
-
-## Technology
-
-- React 19 + TypeScript
-- Vite
-- Node.js + Express
-- Google Gemini SDK
-- Leaflet
-- Tailwind CSS
-- Motion / Lucide React
-- PWA service-worker support
 
 ## Engineering highlights
 
-- Server-side Gemini API integration keeps the provider credential out of the browser bundle.
-- JSON responses are normalized before being returned to the client.
-- Request payloads are bounded to prevent unbounded image-body growth.
+- Gemini credentials stay on the server rather than in the browser bundle.
+- API responses are normalized before reaching the UI.
+- Image request bodies are bounded to avoid unbounded payload growth.
 - Security headers are applied at the server boundary.
-- Interactive map functionality is separated from the AI recognition path.
-- CI runs deterministic dependency installation, TypeScript checking, and a production build.
-- Dependabot and CodeQL workflows provide ongoing dependency and static-analysis coverage.
+- Recognition and map functionality are separated so the geospatial experience is not coupled to model execution.
+- CI performs dependency installation, type/lint validation, and a production build.
+- Dependabot and CodeQL provide dependency and static-analysis automation.
+- PWA service-worker support enables an installable web experience.
+
+## Technology stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 19, TypeScript, Vite |
+| Backend | Node.js, Express |
+| AI | Google Gemini SDK |
+| Maps | Leaflet |
+| Styling | Tailwind CSS |
+| UX | Motion, Lucide React |
+| Platform | PWA service worker |
+| Quality | GitHub Actions, TypeScript checks |
+
+## Repository structure
+
+```text
+Citylens/
+├── src/
+│   ├── components/             # UI components
+│   ├── context/                # Application state
+│   ├── data/                   # Local application data
+│   ├── services/               # External/API services
+│   ├── App.tsx
+│   ├── main.tsx
+│   ├── types.ts
+│   └── serviceWorkerRegistration.ts
+├── server.ts                   # Express + Gemini API boundary
+├── vite.config.ts
+├── package.json
+└── .github/workflows/ci.yml
+```
 
 ## Local development
 
+### Setup
+
 ```bash
+git clone https://github.com/AloneRider-pixel/Citylens.git
+cd Citylens
 cp .env.example .env
-# Add GEMINI_API_KEY to .env
 pnpm install
-pnpm dev
 ```
 
-Build and type-check:
-
-```bash
-pnpm build
-pnpm lint
-```
-
-## Environment
+Set the server-side API key in `.env`:
 
 ```text
 GEMINI_API_KEY=your_key_here
 ```
 
-Never commit real API credentials. Use `.env.example` as the configuration template.
+Never commit a real API credential.
 
-## Project structure
+### Run
 
-```text
-src/
-├── components/       # UI components
-├── context/          # application state
-├── data/              # local application data
-├── services/          # external/API services
-├── App.tsx            # application shell
-├── main.tsx           # React entry point
-├── types.ts           # shared TypeScript types
-└── serviceWorkerRegistration.ts
-server.ts              # Express + Gemini API boundary
-vite.config.ts
-package.json
+```bash
+pnpm dev
+```
+
+### Quality checks
+
+```bash
+pnpm lint
+pnpm build
 ```
 
 ## Security considerations
 
 - Keep `GEMINI_API_KEY` server-side.
-- Validate uploaded image MIME types and payload size before production deployment.
-- Add authentication/rate limiting before exposing the recognition endpoint publicly at scale.
-- Avoid treating model-generated coordinates or nearby-POI data as authoritative without verification.
+- Validate uploaded image MIME types and payload size before public deployment.
+- Add authentication and rate limiting before exposing the recognition endpoint at scale.
+- Treat model-generated coordinates and nearby-POI information as unverified unless independently validated.
 
 ## Roadmap
 
-- Automated unit/integration tests for the API boundary and recognition pipeline
-- Runtime request validation with a schema library
-- API rate limiting and structured request logging
-- Reproducible evaluation set for landmark-recognition quality
-- Optional provider abstraction for additional vision models
+- Unit/integration tests for the recognition API boundary.
+- Runtime schema validation for model/API responses.
+- API rate limiting and structured request logging.
+- Versioned evaluation set for landmark-recognition quality.
+- Provider abstraction for additional vision models.
+- Geospatial result verification and caching.
 
 ## License
 
