@@ -76,6 +76,7 @@ export const TravelPassportModal: React.FC<TravelPassportModalProps> = ({
           </div>
           <button
             onClick={onClose}
+            aria-label="Close passport modal"
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
@@ -225,6 +226,7 @@ export const TravelPassportModal: React.FC<TravelPassportModalProps> = ({
                         onClick={() => onShareTour(tour)}
                         className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                         title="Share this tour"
+                        aria-label="Share this tour"
                       >
                         <Share2 className="w-4 h-4" />
                       </button>
@@ -243,6 +245,7 @@ export const TravelPassportModal: React.FC<TravelPassportModalProps> = ({
                       onClick={() => onDeleteTour(tour.id)}
                       className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors cursor-pointer"
                       title="Remove from passport"
+                      aria-label="Remove from passport"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
