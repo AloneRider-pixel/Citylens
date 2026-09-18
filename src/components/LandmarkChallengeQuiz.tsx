@@ -98,8 +98,8 @@ export const LandmarkChallengeQuiz: React.FC<LandmarkChallengeQuizProps> = ({
     } else {
       setIsCompleted(true);
       // Calculate final score
-      const finalScore = userAnswers.reduce((score, ans, idx) => {
-        return score + (ans === questions[idx]?.correctAnswerIndex ? 1 : 0);
+      const finalScore = userAnswers.reduce((score: number, ans, idx) => {
+        return (score || 0) + (ans === questions[idx]?.correctAnswerIndex ? 1 : 0);
       }, 0);
 
       // Trigger celebratory confetti for perfect score or 2+
@@ -115,8 +115,8 @@ export const LandmarkChallengeQuiz: React.FC<LandmarkChallengeQuizProps> = ({
   };
 
   const calculateScore = () => {
-    return userAnswers.reduce((score, ans, idx) => {
-      return score + (ans === questions[idx]?.correctAnswerIndex ? 1 : 0);
+    return userAnswers.reduce((score: number, ans, idx) => {
+      return (score || 0) + (ans === questions[idx]?.correctAnswerIndex ? 1 : 0);
     }, 0);
   };
 
