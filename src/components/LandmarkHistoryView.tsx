@@ -19,7 +19,7 @@ interface LandmarkHistoryViewProps {
   history: LandmarkHistoryResult;
 }
 
-export const LandmarkHistoryView: React.FC<LandmarkHistoryViewProps> = ({
+export const LandmarkHistoryView: React.FC<LandmarkHistoryViewProps> = React.memo(({
   recognition,
   history,
 }) => {
@@ -286,4 +286,4 @@ export const LandmarkHistoryView: React.FC<LandmarkHistoryViewProps> = ({
       </div>
     </div>
   );
-};
+});
