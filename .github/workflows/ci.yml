@@ -1,4 +1,5 @@
 name: CityLens CI
+# Lockfile is validated with the pinned pnpm toolchain.
 
 on:
   push:
