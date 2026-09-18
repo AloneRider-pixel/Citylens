@@ -21,8 +21,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// Allow payloads up to 25MB for high-resolution city photos
-app.use(express.json({ limit: '25mb' }));
+// Allow payloads up to 25MB only for high-resolution city photos on the recognize endpoint
+app.use('/api/recognize', express.json({ limit: '25mb' }));
+// Security enhancement: Use a strict 100kb limit for all other routes to prevent payload-based DoS attacks
+app.use(express.json({ limit: '100kb' }));
 
 // Initialize GoogleGenAI SDK with required user-agent
 const ai = new GoogleGenAI({
@@ -284,15 +286,15 @@ Return ONLY valid JSON matching this schema:
 
     if (Array.isArray(chunks)) {
       for (const chunk of chunks) {
-        if (chunk.web?.uri) {
+        if (chunk.web&& chunk.web!.uri) {
           try {
-            const urlObj = new URL(chunk.web.uri);
-            const title = chunk.web.title || urlObj.hostname.replace('www.', '');
+            const urlObj = new URL(chunk.web!.uri);
+            const title = chunk.web!.title || urlObj.hostname.replace('www.', '');
             // Avoid duplicate URLs
-            if (!searchSources.some((s) => s.url === chunk.web.uri)) {
+            if (!searchSources.some((s) => s.url === chunk.web!.uri)) {
               searchSources.push({
                 title,
-                url: chunk.web.uri,
+                url: chunk.web!.uri,
               });
             }
           } catch {}

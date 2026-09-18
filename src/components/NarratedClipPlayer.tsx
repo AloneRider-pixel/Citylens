@@ -230,6 +230,7 @@ export const NarratedClipPlayer: React.FC<NarratedClipPlayerProps> = ({
               disabled={isRegeneratingAudio}
               className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs flex items-center gap-1 transition-colors disabled:opacity-50"
               title="Regenerate narration with this voice"
+              aria-label="Regenerate narration with this voice"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isRegeneratingAudio ? 'animate-spin' : ''}`} />
             </button>
@@ -324,6 +325,7 @@ export const NarratedClipPlayer: React.FC<NarratedClipPlayerProps> = ({
             onClick={handleReplay}
             className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
             title="Replay from beginning"
+            aria-label="Replay from beginning"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
@@ -334,6 +336,7 @@ export const NarratedClipPlayer: React.FC<NarratedClipPlayerProps> = ({
             disabled={isRegeneratingAudio}
             className="w-12 h-12 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center shadow-lg transition-transform active:scale-95 disabled:opacity-50"
             title={isPlaying ? 'Pause AR Audio Guide' : 'Play AR Audio Guide'}
+            aria-label={isPlaying ? 'Pause AR Audio Guide' : 'Play AR Audio Guide'}
           >
             {isPlaying ? (
               <Pause className="w-6 h-6 fill-current" />
@@ -346,6 +349,7 @@ export const NarratedClipPlayer: React.FC<NarratedClipPlayerProps> = ({
             onClick={toggleMute}
             className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
             title={isMuted ? 'Unmute' : 'Mute'}
+            aria-label={isMuted ? 'Unmute' : 'Mute'}
           >
             {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4" />}
           </button>
