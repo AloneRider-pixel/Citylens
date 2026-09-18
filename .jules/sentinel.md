@@ -7,3 +7,8 @@
 **Vulnerability:** A global `express.json({ limit: '25mb' })` middleware exposed all endpoints to payload-based Denial of Service (DoS) attacks, even those only requiring small payloads.
 **Learning:** Broadly applying large payload limits for the convenience of a single endpoint (like image upload) compromises the security of the entire application API.
 **Prevention:** Always apply large payload limits route-specifically (e.g., `app.use('/api/recognize', express.json({ limit: '25mb' }))`), and use a strict, small default limit (e.g., `100kb`) globally for all other routes to mitigate memory exhaustion risks.
+
+## 2024-05-24 - [Implement Content Security Policy (CSP) Headers]
+**Vulnerability:** The application was missing a Content-Security-Policy header, leaving it susceptible to Cross-Site Scripting (XSS) and data injection attacks.
+**Learning:** Without a CSP, the browser has no instructions on which sources are trusted to load resources from (scripts, styles, images, etc.). This allows attackers to inject malicious content that the browser will execute.
+**Prevention:** Always implement a robust CSP header (`Content-Security-Policy`) that strictly limits the origins from which content can be loaded, using directives like `default-src 'self'` and explicitly allowing only necessary external domains.
