@@ -46,7 +46,7 @@ const MAP_TILE_PROVIDERS = {
   },
 };
 
-export const LandmarkMapView: React.FC<LandmarkMapViewProps> = ({ recognition }) => {
+export const LandmarkMapView: React.FC<LandmarkMapViewProps> = React.memo(({ recognition }) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
@@ -511,4 +511,4 @@ export const LandmarkMapView: React.FC<LandmarkMapViewProps> = ({ recognition })
       </div>
     </section>
   );
-};
+});
