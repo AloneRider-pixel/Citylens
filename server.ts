@@ -232,6 +232,11 @@ app.post('/api/history', async (req, res) => {
       return res.status(400).json({ error: 'landmarkName is required' });
     }
 
+    // Security enhancement: Validate input lengths to prevent token exhaustion and financial DoS
+    if (landmarkName.length > 200 || (city && city.length > 200) || (country && country.length > 200)) {
+      return res.status(400).json({ error: 'Input exceeds maximum length' });
+    }
+
     const queryInfo = `${landmarkName}${city ? ` in ${city}` : ''}${country ? `, ${country}` : ''}`;
     const prompt = `Use Google Search to retrieve accurate, verified, and fascinating historical information for: "${queryInfo}".
 Also consider aliases: ${alternateNames ? alternateNames.join(', ') : 'none'}.
@@ -324,6 +329,11 @@ app.post('/api/tts', async (req, res) => {
       return res.status(400).json({ error: 'text is required' });
     }
 
+    // Security enhancement: Validate input lengths to prevent token exhaustion and financial DoS
+    if (text.length > 5000) {
+      return res.status(400).json({ error: 'Text exceeds maximum length' });
+    }
+
     // Supported voices: 'Kore', 'Puck', 'Fenrir', 'Zephyr', 'Charon'
     const allowedVoices = ['Kore', 'Puck', 'Fenrir', 'Zephyr', 'Charon'];
     const selectedVoice = allowedVoices.includes(voiceName) ? voiceName : 'Kore';
@@ -383,6 +393,11 @@ app.post('/api/tts', async (req, res) => {
 app.post('/api/weather', async (req, res) => {
   try {
     const { latitude, longitude, landmarkName, city, country } = req.body;
+
+    // Security enhancement: Validate input lengths to prevent token exhaustion and financial DoS
+    if ((landmarkName && landmarkName.length > 200) || (city && city.length > 200) || (country && country.length > 200)) {
+      return res.status(400).json({ error: 'Input exceeds maximum length' });
+    }
 
     const lat = Number(latitude) || 48.8584;
     const lng = Number(longitude) || 2.2945;
@@ -590,6 +605,14 @@ app.post('/api/quiz', async (req, res) => {
     const { landmarkName, city, country, historyContext } = req.body;
     if (!landmarkName) {
       return res.status(400).json({ error: 'landmarkName is required' });
+    }
+
+    // Security enhancement: Validate input lengths to prevent token exhaustion and financial DoS
+    if (landmarkName.length > 200 || (city && city.length > 200) || (country && country.length > 200)) {
+      return res.status(400).json({ error: 'Input exceeds maximum length' });
+    }
+    if (historyContext && typeof historyContext === 'string' && historyContext.length > 10000) {
+      return res.status(400).json({ error: 'Context exceeds maximum length' });
     }
 
     const prompt = `You are a lively, scholarly museum curator and architectural tour guide.
