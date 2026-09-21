@@ -222,6 +222,11 @@ CRITICAL:
   }
 });
 
+// Helper to validate input lengths to prevent token exhaustion DoS
+const isSafeString = (val: any, maxLength: number) => {
+  return val === undefined || val === null || (typeof val === 'string' && val.length <= maxLength);
+};
+
 // ----------------------------------------------------------------------------
 // API ROUTE 2: Fetch History & Trivia via Search Grounding (gemini-3.5-flash)
 // ----------------------------------------------------------------------------
@@ -230,6 +235,11 @@ app.post('/api/history', async (req, res) => {
     const { landmarkName, city, country, alternateNames } = req.body;
     if (!landmarkName) {
       return res.status(400).json({ error: 'landmarkName is required' });
+    }
+
+    // Security enhancement: Validate input lengths to prevent token exhaustion DoS
+    if (!isSafeString(landmarkName, 200) || !isSafeString(city, 100) || !isSafeString(country, 100)) {
+       return res.status(400).json({ error: 'Input exceeds maximum allowed length' });
     }
 
     const queryInfo = `${landmarkName}${city ? ` in ${city}` : ''}${country ? `, ${country}` : ''}`;
@@ -322,6 +332,11 @@ app.post('/api/tts', async (req, res) => {
     const { text, voiceName = 'Kore' } = req.body;
     if (!text) {
       return res.status(400).json({ error: 'text is required' });
+    }
+
+    // Security enhancement: Validate input length to prevent token exhaustion DoS
+    if (!isSafeString(text, 2000)) {
+      return res.status(400).json({ error: 'Text input exceeds maximum allowed length' });
     }
 
     // Supported voices: 'Kore', 'Puck', 'Fenrir', 'Zephyr', 'Charon'
@@ -592,11 +607,17 @@ app.post('/api/quiz', async (req, res) => {
       return res.status(400).json({ error: 'landmarkName is required' });
     }
 
+    // Security enhancement: Validate input lengths to prevent token exhaustion DoS
+    const serializedHistory = typeof historyContext === 'string' ? historyContext : JSON.stringify(historyContext || {});
+    if (!isSafeString(landmarkName, 200) || !isSafeString(city, 100) || !isSafeString(country, 100) || !isSafeString(serializedHistory, 10000)) {
+      return res.status(400).json({ error: 'Input exceeds maximum allowed length' });
+    }
+
     const prompt = `You are a lively, scholarly museum curator and architectural tour guide.
 Generate a fun 3-question "Landmark Challenge" trivia quiz for travelers who just finished exploring: "${landmarkName}" located in ${city || 'the city'}, ${country || ''}.
 
 History & Architecture Context:
-${typeof historyContext === 'string' ? historyContext : JSON.stringify(historyContext || {})}
+${serializedHistory}
 
 Guidelines:
 1. Create exactly 3 distinct, high-quality multiple choice questions.

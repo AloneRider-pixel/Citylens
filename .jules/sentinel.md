@@ -7,3 +7,8 @@
 **Vulnerability:** A global `express.json({ limit: '25mb' })` middleware exposed all endpoints to payload-based Denial of Service (DoS) attacks, even those only requiring small payloads.
 **Learning:** Broadly applying large payload limits for the convenience of a single endpoint (like image upload) compromises the security of the entire application API.
 **Prevention:** Always apply large payload limits route-specifically (e.g., `app.use('/api/recognize', express.json({ limit: '25mb' }))`), and use a strict, small default limit (e.g., `100kb`) globally for all other routes to mitigate memory exhaustion risks.
+
+## 2024-05-24 - [Input Length Validation for AI Endpoints]
+**Vulnerability:** Endpoints fetching data from the Gemini AI SDK (`/api/history`, `/api/tts`, `/api/quiz`) were accepting unbounded string inputs. This allows token exhaustion and financial DoS attacks because large texts are directly processed by the model without checks.
+**Learning:** External AI models have token limits and are typically billed per token. While global body payload limits (e.g. 100kb) protect the memory from DoS, they are insufficient for generation endpoints where slightly larger but valid-looking inputs could unnecessarily drain financial resources.
+**Prevention:** Apply rigorous length validations on all strings sent as prompts or context to AI SDKs. Fail with a 400 Bad Request error early if lengths exceed sane limits.
