@@ -748,7 +748,8 @@ export const VRPanoramaViewer: React.FC<VRPanoramaViewerProps> = ({
                     </div>
                     <button
                       onClick={() => onSelectPoint(null)}
-                      className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                      aria-label="Close detail view"
+                      className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
                     >
                       <X className="w-4 h-4" />
                     </button>
