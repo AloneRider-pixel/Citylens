@@ -102,8 +102,16 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
         {/* Option A: Take photo with camera */}
         <div
+          role="button"
+          tabIndex={0}
           onClick={onOpenCamera}
-          className="group relative cursor-pointer overflow-hidden rounded-2xl border-2 border-slate-900 dark:border-amber-500/50 bg-slate-950 dark:bg-slate-900 p-6 text-white shadow-lg hover:shadow-xl dark:hover:border-amber-400 transition-all duration-200 flex flex-col justify-between"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onOpenCamera();
+            }
+          }}
+          className="group relative cursor-pointer overflow-hidden rounded-2xl border-2 border-slate-900 dark:border-amber-500/50 bg-slate-950 dark:bg-slate-900 p-6 text-white shadow-lg hover:shadow-xl dark:hover:border-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 transition-all duration-200 flex flex-col justify-between"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
           <div>
@@ -128,11 +136,19 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
 
         {/* Option B: Upload photo file or drag-and-drop */}
         <div
+          role="button"
+          tabIndex={0}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onClick={() => fileInputRef.current?.click()}
-          className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-6 transition-all duration-200 flex flex-col justify-between bg-white dark:bg-slate-900 ${
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
+          className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 transition-all duration-200 flex flex-col justify-between bg-white dark:bg-slate-900 ${
             isDragging
               ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-950/30'
               : 'border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-amber-500/50 hover:bg-slate-50/80 dark:hover:bg-slate-850'
