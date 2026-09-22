@@ -232,6 +232,18 @@ app.post('/api/history', async (req, res) => {
       return res.status(400).json({ error: 'landmarkName is required' });
     }
 
+    // Security enhancement: Input length validation to prevent token exhaustion / DoS
+    if (
+      (typeof landmarkName !== 'string' || landmarkName.length > 200) ||
+      (city && (typeof city !== 'string' || city.length > 200)) ||
+      (country && (typeof country !== 'string' || country.length > 200))
+    ) {
+      return res.status(400).json({ error: 'Input fields must be strings and not exceed maximum allowed length' });
+    }
+    if (alternateNames && Array.isArray(alternateNames) && alternateNames.some(name => typeof name !== 'string' || name.length > 200)) {
+      return res.status(400).json({ error: 'alternateNames exceeds maximum allowed length' });
+    }
+
     const queryInfo = `${landmarkName}${city ? ` in ${city}` : ''}${country ? `, ${country}` : ''}`;
     const prompt = `Use Google Search to retrieve accurate, verified, and fascinating historical information for: "${queryInfo}".
 Also consider aliases: ${alternateNames ? alternateNames.join(', ') : 'none'}.
@@ -324,6 +336,11 @@ app.post('/api/tts', async (req, res) => {
       return res.status(400).json({ error: 'text is required' });
     }
 
+    // Security enhancement: Input length validation to prevent token exhaustion / DoS
+    if (typeof text !== 'string' || text.length > 2000) {
+      return res.status(400).json({ error: 'text exceeds maximum allowed length' });
+    }
+
     // Supported voices: 'Kore', 'Puck', 'Fenrir', 'Zephyr', 'Charon'
     const allowedVoices = ['Kore', 'Puck', 'Fenrir', 'Zephyr', 'Charon'];
     const selectedVoice = allowedVoices.includes(voiceName) ? voiceName : 'Kore';
@@ -383,6 +400,15 @@ app.post('/api/tts', async (req, res) => {
 app.post('/api/weather', async (req, res) => {
   try {
     const { latitude, longitude, landmarkName, city, country } = req.body;
+
+    // Security enhancement: Input length validation to prevent token exhaustion / DoS
+    if (
+      (landmarkName && (typeof landmarkName !== 'string' || landmarkName.length > 200)) ||
+      (city && (typeof city !== 'string' || city.length > 200)) ||
+      (country && (typeof country !== 'string' || country.length > 200))
+    ) {
+      return res.status(400).json({ error: 'Input fields must be strings and not exceed maximum allowed length' });
+    }
 
     const lat = Number(latitude) || 48.8584;
     const lng = Number(longitude) || 2.2945;
@@ -590,6 +616,15 @@ app.post('/api/quiz', async (req, res) => {
     const { landmarkName, city, country, historyContext } = req.body;
     if (!landmarkName) {
       return res.status(400).json({ error: 'landmarkName is required' });
+    }
+
+    // Security enhancement: Input length validation to prevent token exhaustion / DoS
+    if (
+      (typeof landmarkName !== 'string' || landmarkName.length > 200) ||
+      (city && (typeof city !== 'string' || city.length > 200)) ||
+      (country && (typeof country !== 'string' || country.length > 200))
+    ) {
+      return res.status(400).json({ error: 'Input fields must be strings and not exceed maximum allowed length' });
     }
 
     const prompt = `You are a lively, scholarly museum curator and architectural tour guide.
