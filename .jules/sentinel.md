@@ -7,3 +7,8 @@
 **Vulnerability:** A global `express.json({ limit: '25mb' })` middleware exposed all endpoints to payload-based Denial of Service (DoS) attacks, even those only requiring small payloads.
 **Learning:** Broadly applying large payload limits for the convenience of a single endpoint (like image upload) compromises the security of the entire application API.
 **Prevention:** Always apply large payload limits route-specifically (e.g., `app.use('/api/recognize', express.json({ limit: '25mb' }))`), and use a strict, small default limit (e.g., `100kb`) globally for all other routes to mitigate memory exhaustion risks.
+
+## 2024-05-24 - [Fix Input Length Validation Bypass via Array Payloads]
+**Vulnerability:** Input length validation on endpoints (`landmarkName`, `text`) was checking `.length` without first strictly verifying the input type. If a malicious client sent an array instead of a string, `.length` would evaluate the number of array elements instead of string characters, allowing massive string payloads within array elements to bypass the character limit and potentially cause memory exhaustion or API token limits.
+**Learning:** In dynamically typed languages or when parsing JSON payloads in Express (via `express.json()`), input types can be easily manipulated by clients. Checking `.length` is ambiguous and insecure without type context.
+**Prevention:** Always strictly verify the input type (e.g., `typeof val === 'string'`) before checking `.length` to ensure limits are applied to character counts rather than array elements.

@@ -91,6 +91,13 @@ function extractJson(text: string): any {
   }
 }
 
+/**
+ * Validates that an input is strictly a string and within a maximum length
+ * Security enhancement: Prevents payload bypasses where an array length might be
+ * checked instead of string character count.
+ */
+const isValidStr = (val: any, maxLen: number) => typeof val === 'string' && val.length <= maxLen;
+
 // ----------------------------------------------------------------------------
 // API ROUTE 1: AI Landmark Recognition using gemini-3.1-pro-preview
 // ----------------------------------------------------------------------------
@@ -228,8 +235,8 @@ CRITICAL:
 app.post('/api/history', async (req, res) => {
   try {
     const { landmarkName, city, country, alternateNames } = req.body;
-    if (!landmarkName) {
-      return res.status(400).json({ error: 'landmarkName is required' });
+    if (!landmarkName || !isValidStr(landmarkName, 200)) {
+      return res.status(400).json({ error: 'landmarkName must be a string under 200 characters' });
     }
 
     const queryInfo = `${landmarkName}${city ? ` in ${city}` : ''}${country ? `, ${country}` : ''}`;
@@ -320,8 +327,8 @@ Return ONLY valid JSON matching this schema:
 app.post('/api/tts', async (req, res) => {
   try {
     const { text, voiceName = 'Kore' } = req.body;
-    if (!text) {
-      return res.status(400).json({ error: 'text is required' });
+    if (!text || !isValidStr(text, 1000)) {
+      return res.status(400).json({ error: 'text must be a string under 1000 characters' });
     }
 
     // Supported voices: 'Kore', 'Puck', 'Fenrir', 'Zephyr', 'Charon'
@@ -588,8 +595,8 @@ Return JSON strictly:
 app.post('/api/quiz', async (req, res) => {
   try {
     const { landmarkName, city, country, historyContext } = req.body;
-    if (!landmarkName) {
-      return res.status(400).json({ error: 'landmarkName is required' });
+    if (!landmarkName || !isValidStr(landmarkName, 200)) {
+      return res.status(400).json({ error: 'landmarkName must be a string under 200 characters' });
     }
 
     const prompt = `You are a lively, scholarly museum curator and architectural tour guide.
