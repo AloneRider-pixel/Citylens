@@ -305,6 +305,7 @@ export const ShareTourModal: React.FC<ShareTourModalProps> = ({
           </div>
           <button
             onClick={onClose}
+            aria-label="Close share modal"
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
