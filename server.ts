@@ -97,8 +97,12 @@ function extractJson(text: string): any {
 app.post('/api/recognize', async (req, res) => {
   try {
     const { imageBase64, mimeType } = req.body;
-    if (!imageBase64) {
-      return res.status(400).json({ error: 'imageBase64 is required' });
+    if (!imageBase64 || typeof imageBase64 !== 'string') {
+      return res.status(400).json({ error: 'imageBase64 must be a string' });
+    }
+    // Very basic sanity check on base64 image length (prevent massive inputs)
+    if (imageBase64.length > 35000000) { // ~25MB in base64
+      return res.status(400).json({ error: 'imageBase64 is too large' });
     }
 
     // Clean data URI prefix if present
@@ -228,8 +232,14 @@ CRITICAL:
 app.post('/api/history', async (req, res) => {
   try {
     const { landmarkName, city, country, alternateNames } = req.body;
-    if (!landmarkName) {
-      return res.status(400).json({ error: 'landmarkName is required' });
+    if (!landmarkName || typeof landmarkName !== 'string' || landmarkName.length > 200) {
+      return res.status(400).json({ error: 'landmarkName is required and must be a string under 200 characters' });
+    }
+    if (city && (typeof city !== 'string' || city.length > 100)) {
+        return res.status(400).json({ error: 'city must be a string under 100 characters' });
+    }
+    if (country && (typeof country !== 'string' || country.length > 100)) {
+        return res.status(400).json({ error: 'country must be a string under 100 characters' });
     }
 
     const queryInfo = `${landmarkName}${city ? ` in ${city}` : ''}${country ? `, ${country}` : ''}`;
@@ -320,8 +330,8 @@ Return ONLY valid JSON matching this schema:
 app.post('/api/tts', async (req, res) => {
   try {
     const { text, voiceName = 'Kore' } = req.body;
-    if (!text) {
-      return res.status(400).json({ error: 'text is required' });
+    if (!text || typeof text !== 'string' || text.length > 5000) {
+      return res.status(400).json({ error: 'text is required and must be a string under 5000 characters' });
     }
 
     // Supported voices: 'Kore', 'Puck', 'Fenrir', 'Zephyr', 'Charon'
@@ -383,6 +393,16 @@ app.post('/api/tts', async (req, res) => {
 app.post('/api/weather', async (req, res) => {
   try {
     const { latitude, longitude, landmarkName, city, country } = req.body;
+
+    if (landmarkName && (typeof landmarkName !== 'string' || landmarkName.length > 200)) {
+        return res.status(400).json({ error: 'landmarkName must be a string under 200 characters' });
+    }
+    if (city && (typeof city !== 'string' || city.length > 100)) {
+        return res.status(400).json({ error: 'city must be a string under 100 characters' });
+    }
+    if (country && (typeof country !== 'string' || country.length > 100)) {
+        return res.status(400).json({ error: 'country must be a string under 100 characters' });
+    }
 
     const lat = Number(latitude) || 48.8584;
     const lng = Number(longitude) || 2.2945;
@@ -588,8 +608,14 @@ Return JSON strictly:
 app.post('/api/quiz', async (req, res) => {
   try {
     const { landmarkName, city, country, historyContext } = req.body;
-    if (!landmarkName) {
-      return res.status(400).json({ error: 'landmarkName is required' });
+    if (!landmarkName || typeof landmarkName !== 'string' || landmarkName.length > 200) {
+      return res.status(400).json({ error: 'landmarkName is required and must be a string under 200 characters' });
+    }
+    if (city && (typeof city !== 'string' || city.length > 100)) {
+        return res.status(400).json({ error: 'city must be a string under 100 characters' });
+    }
+    if (country && (typeof country !== 'string' || country.length > 100)) {
+        return res.status(400).json({ error: 'country must be a string under 100 characters' });
     }
 
     const prompt = `You are a lively, scholarly museum curator and architectural tour guide.
