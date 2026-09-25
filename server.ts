@@ -228,8 +228,16 @@ CRITICAL:
 app.post('/api/history', async (req, res) => {
   try {
     const { landmarkName, city, country, alternateNames } = req.body;
-    if (!landmarkName) {
-      return res.status(400).json({ error: 'landmarkName is required' });
+
+    // Security Fix: Prevent express.json() array-based length bypass & DoS token exhaustion
+    if (!landmarkName || typeof landmarkName !== 'string' || landmarkName.length > 200) {
+      return res.status(400).json({ error: 'Valid landmarkName is required' });
+    }
+    if (city && (typeof city !== 'string' || city.length > 200)) {
+      return res.status(400).json({ error: 'Invalid city format' });
+    }
+    if (country && (typeof country !== 'string' || country.length > 200)) {
+      return res.status(400).json({ error: 'Invalid country format' });
     }
 
     const queryInfo = `${landmarkName}${city ? ` in ${city}` : ''}${country ? `, ${country}` : ''}`;
@@ -320,8 +328,10 @@ Return ONLY valid JSON matching this schema:
 app.post('/api/tts', async (req, res) => {
   try {
     const { text, voiceName = 'Kore' } = req.body;
-    if (!text) {
-      return res.status(400).json({ error: 'text is required' });
+
+    // Security Fix: Prevent express.json() array bypass & limit text length for TTS DoS protection
+    if (!text || typeof text !== 'string' || text.length > 2000) {
+      return res.status(400).json({ error: 'Valid text (max 2000 chars) is required' });
     }
 
     // Supported voices: 'Kore', 'Puck', 'Fenrir', 'Zephyr', 'Charon'
@@ -588,8 +598,19 @@ Return JSON strictly:
 app.post('/api/quiz', async (req, res) => {
   try {
     const { landmarkName, city, country, historyContext } = req.body;
-    if (!landmarkName) {
-      return res.status(400).json({ error: 'landmarkName is required' });
+
+    // Security Fix: Validate string inputs and limit length to prevent DoS
+    if (!landmarkName || typeof landmarkName !== 'string' || landmarkName.length > 200) {
+      return res.status(400).json({ error: 'Valid landmarkName is required' });
+    }
+    if (city && (typeof city !== 'string' || city.length > 200)) {
+      return res.status(400).json({ error: 'Invalid city format' });
+    }
+    if (country && (typeof country !== 'string' || country.length > 200)) {
+      return res.status(400).json({ error: 'Invalid country format' });
+    }
+    if (historyContext && (typeof historyContext !== 'string' || historyContext.length > 5000)) {
+      return res.status(400).json({ error: 'Invalid historyContext format' });
     }
 
     const prompt = `You are a lively, scholarly museum curator and architectural tour guide.
