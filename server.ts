@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { GoogleGenAI, Modality } from '@google/genai';
 import { createServer as createViteServer } from 'vite';
+import { validateImageInput } from './image-validation';
 
 dotenv.config();
 
@@ -97,13 +98,17 @@ function extractJson(text: string): any {
 app.post('/api/recognize', async (req, res) => {
   try {
     const { imageBase64, mimeType } = req.body;
-    if (!imageBase64) {
-      return res.status(400).json({ error: 'imageBase64 is required' });
+
+    let validatedImage: ReturnType<typeof validateImageInput>;
+    try {
+      validatedImage = validateImageInput(imageBase64, mimeType);
+    } catch (error) {
+      return res.status(400).json({
+        error: error instanceof Error ? error.message : 'Invalid image input',
+      });
     }
 
-    // Clean data URI prefix if present
-    const cleanBase64 = imageBase64.replace(/^data:image\/[a-zA-Z]+;base64,/, '');
-    const cleanMime = mimeType || 'image/jpeg';
+    const { cleanBase64, mimeType: cleanMime } = validatedImage;
 
     const prompt = `You are an expert architectural historian, urban planner, and visual tourism AI.
 Examine this city photo and identify the landmark, monument, historical building, architectural feature, or urban sight.
