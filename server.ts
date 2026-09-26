@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { GoogleGenAI, Modality } from '@google/genai';
 import { createServer as createViteServer } from 'vite';
 import { validateImageInput } from './image-validation';
+import { validateLandmarkRecognition } from './server-validation';
 
 dotenv.config();
 
@@ -214,6 +215,13 @@ CRITICAL:
         throw new Error('Empty response from fallback model');
       }
       resultJson = extractJson(fallbackResponse.text);
+    }
+
+    try {
+      resultJson = validateLandmarkRecognition(resultJson);
+    } catch (validationError) {
+      console.error('Invalid model recognition payload:', validationError);
+      return res.status(502).json({ error: 'Model returned invalid recognition data' });
     }
 
     resultJson.modelUsed = modelUsed;
