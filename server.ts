@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { GoogleGenAI, Modality } from '@google/genai';
 import { createServer as createViteServer } from 'vite';
+import { validateLandmarkRecognition } from './server-validation';
 
 dotenv.config();
 
@@ -211,6 +212,7 @@ CRITICAL:
       resultJson = extractJson(fallbackResponse.text);
     }
 
+    resultJson = validateLandmarkRecognition(resultJson);
     resultJson.modelUsed = modelUsed;
     res.json(resultJson);
   } catch (error: any) {
@@ -302,6 +304,9 @@ Return ONLY valid JSON matching this schema:
       }
     }
 
+    if (searchSources.length === 0) {
+      return res.status(502).json({ error: 'No verifiable sources returned for landmark history' });
+    }
     parsedData.searchSources = searchSources;
     parsedData.modelUsed = 'gemini-3.5-flash (with Google Search Grounding)';
     res.json(parsedData);
@@ -559,26 +564,7 @@ Return JSON strictly:
     });
   } catch (error: any) {
     console.error('Error in /api/weather:', error);
-    // Provide a resilient baseline so the widget never fails or crashes
-    res.json({
-      temperatureC: 21,
-      temperatureF: 69.8,
-      apparentTemperatureC: 21,
-      apparentTemperatureF: 69.8,
-      condition: 'Pleasant & clear',
-      weatherCode: 0,
-      isDay: true,
-      relativeHumidity: 48,
-      windSpeedKmh: 11,
-      windDirectionText: 'W',
-      cloudCoverPercent: 20,
-      precipitationMm: 0,
-      uvIndex: 4,
-      visitingAdvisory: 'Mild conditions optimal for outdoor walking tours and photography.',
-      photoTip: 'Angle with the sun slightly behind you to highlight carved details.',
-      lastUpdated: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      source: 'Estimated Regional Meteorological Data',
-    });
+    res.status(503).json({ error: 'Live weather is temporarily unavailable' });
   }
 });
 
@@ -637,52 +623,8 @@ Return ONLY valid JSON with this exact schema:
       console.warn('AI Quiz generation failed, falling back to curated quiz bank:', modelError);
     }
 
-    // Fallback if model parsing had issues or network error
-    if (!quizJson || !Array.isArray(quizJson.questions) || quizJson.questions.length < 3) {
-      quizJson = {
-        landmarkName,
-        questions: [
-          {
-            id: 'q1',
-            question: `What unique architectural or engineering adaptation characterizes ${landmarkName}?`,
-            options: [
-              'Custom thermal expansion joints & precision structural engineering',
-              'Constructed entirely without mathematical scaffolding',
-              'Built over an ancient subterranean freshwater lake',
-              'Designed by a committee of anonymous Venetian stone masons',
-            ],
-            correctAnswerIndex: 0,
-            explanation: `${landmarkName} is celebrated for pioneering engineering adaptations that accommodate thermal shifts and soil load distribution.`,
-            historicalContextSnippet: 'Engineering Ingenuity',
-          },
-          {
-            id: 'q2',
-            question: `During its original historical conception in ${city || 'its host city'}, what was a primary purpose or debate surrounding ${landmarkName}?`,
-            options: [
-              'It was praised unanimously without any public protest',
-              'It served both as a monument of national pride and an innovative technological demonstration',
-              'It was intended to be dismantled within 48 hours of opening',
-              'It was originally painted pitch black to absorb moonlight',
-            ],
-            correctAnswerIndex: 1,
-            explanation: 'Major world monuments like this were built as ambitious declarations of cultural pride and technological milestones.',
-            historicalContextSnippet: 'Historical Conception',
-          },
-          {
-            id: 'q3',
-            question: `Which hidden detail or secret feature is famously connected to ${landmarkName}?`,
-            options: [
-              'An underground tunnel system or restricted private apex quarters',
-              'A buried gold treasure chest beneath the foundation stone',
-              'A secret steam locomotive depot hidden in the attic',
-              'A hollow bronze statue honoring Roman deities',
-            ],
-            correctAnswerIndex: 0,
-            explanation: 'Most monumental historic landmarks feature restricted passageways, private apartments, or maintenance labyrinths.',
-            historicalContextSnippet: 'Secret Trivia',
-          },
-        ],
-      };
+    if (!quizJson || !Array.isArray(quizJson.questions) || quizJson.questions.length !== 3 || quizJson.questions.some((q: any) => !q || !Array.isArray(q.options) || q.options.length !== 4 || !Number.isInteger(q.correctAnswerIndex) || q.correctAnswerIndex < 0 || q.correctAnswerIndex > 3)) {
+      return res.status(502).json({ error: 'Quiz provider returned unverifiable data' });
     }
 
     quizJson.modelUsed = 'gemini-3.5-flash';
