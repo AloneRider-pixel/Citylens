@@ -64,5 +64,5 @@ export function validateLandmarkRecognition(value: unknown): LandmarkRecognition
     if (poiValue.walkingTimeMinutes !== undefined) assertFiniteNumber(poiValue.walkingTimeMinutes, `nearbyPOIs[${index}].walkingTimeMinutes`, 0);
   }
 
-  return value as LandmarkRecognitionResult;
+  return value as unknown as LandmarkRecognitionResult;
 }
