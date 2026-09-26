@@ -24,7 +24,7 @@ test('rejects malformed base64 payloads', () => {
 });
 
 test('rejects payloads above the 15 MB decoded limit', () => {
-  const oversized = 'A'.repeat(20 * 1024 * 1024);
+  const oversized = 'A'.repeat(24 * 1024 * 1024);
   assert.throws(
     () => validateImageInput(oversized, 'image/jpeg'),
     /15 MB size limit/,
