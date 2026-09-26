@@ -70,6 +70,10 @@ function pcmToWav(pcmBuffer: Buffer, sampleRate = 24000, numChannels = 1, bitsPe
 /**
  * Utility to extract clean JSON object from Gemini response string
  */
+function isValidStr(val: any, maxLen: number): boolean {
+  return typeof val === 'string' && val.length <= maxLen;
+}
+
 function extractJson(text: string): any {
   try {
     const trimmed = text.trim();
@@ -244,6 +248,9 @@ app.post('/api/history', async (req, res) => {
     if (!landmarkName) {
       return res.status(400).json({ error: 'landmarkName is required' });
     }
+    if (!isValidStr(landmarkName, 100)) return res.status(400).json({ error: 'Invalid landmarkName' });
+    if (city !== undefined && !isValidStr(city, 100)) return res.status(400).json({ error: 'Invalid city' });
+    if (country !== undefined && !isValidStr(country, 100)) return res.status(400).json({ error: 'Invalid country' });
 
     const queryInfo = `${landmarkName}${city ? ` in ${city}` : ''}${country ? `, ${country}` : ''}`;
     const prompt = `Use Google Search to retrieve accurate, verified, and fascinating historical information for: "${queryInfo}".
@@ -336,6 +343,7 @@ app.post('/api/tts', async (req, res) => {
     if (!text) {
       return res.status(400).json({ error: 'text is required' });
     }
+    if (!isValidStr(text, 1000)) return res.status(400).json({ error: 'Invalid text' });
 
     // Supported voices: 'Kore', 'Puck', 'Fenrir', 'Zephyr', 'Charon'
     const allowedVoices = ['Kore', 'Puck', 'Fenrir', 'Zephyr', 'Charon'];
@@ -396,6 +404,10 @@ app.post('/api/tts', async (req, res) => {
 app.post('/api/weather', async (req, res) => {
   try {
     const { latitude, longitude, landmarkName, city, country } = req.body;
+
+    if (landmarkName !== undefined && !isValidStr(landmarkName, 100)) return res.status(400).json({ error: 'Invalid landmarkName' });
+    if (city !== undefined && !isValidStr(city, 100)) return res.status(400).json({ error: 'Invalid city' });
+    if (country !== undefined && !isValidStr(country, 100)) return res.status(400).json({ error: 'Invalid country' });
 
     const lat = Number(latitude) || 48.8584;
     const lng = Number(longitude) || 2.2945;
@@ -604,6 +616,9 @@ app.post('/api/quiz', async (req, res) => {
     if (!landmarkName) {
       return res.status(400).json({ error: 'landmarkName is required' });
     }
+    if (!isValidStr(landmarkName, 100)) return res.status(400).json({ error: 'Invalid landmarkName' });
+    if (city !== undefined && !isValidStr(city, 100)) return res.status(400).json({ error: 'Invalid city' });
+    if (country !== undefined && !isValidStr(country, 100)) return res.status(400).json({ error: 'Invalid country' });
 
     const prompt = `You are a lively, scholarly museum curator and architectural tour guide.
 Generate a fun 3-question "Landmark Challenge" trivia quiz for travelers who just finished exploring: "${landmarkName}" located in ${city || 'the city'}, ${country || ''}.
