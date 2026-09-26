@@ -12,7 +12,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test": "tsx server-validation.test.ts"
+    "test": "node --import tsx --test server-validation.test.ts image-validation.test.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
