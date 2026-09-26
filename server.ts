@@ -233,8 +233,20 @@ CRITICAL:
 app.post('/api/history', async (req, res) => {
   try {
     const { landmarkName, city, country, alternateNames } = req.body;
-    if (!landmarkName) {
-      return res.status(400).json({ error: 'landmarkName is required' });
+    if (!landmarkName || typeof landmarkName !== 'string' || landmarkName.length > 200) {
+      return res.status(400).json({ error: 'landmarkName must be a non-empty string (max 200 characters)' });
+    }
+    if (city !== undefined && (typeof city !== 'string' || city.length > 200)) {
+      return res.status(400).json({ error: 'city must be a string (max 200 characters)' });
+    }
+    if (country !== undefined && (typeof country !== 'string' || country.length > 200)) {
+      return res.status(400).json({ error: 'country must be a string (max 200 characters)' });
+    }
+    if (alternateNames !== undefined) {
+      if (!Array.isArray(alternateNames) || alternateNames.length > 10 ||
+          alternateNames.some((name) => typeof name !== 'string' || name.length > 200)) {
+        return res.status(400).json({ error: 'alternateNames must be an array of at most 10 strings (max 200 characters each)' });
+      }
     }
 
     const queryInfo = `${landmarkName}${city ? ` in ${city}` : ''}${country ? `, ${country}` : ''}`;
@@ -325,8 +337,8 @@ Return ONLY valid JSON matching this schema:
 app.post('/api/tts', async (req, res) => {
   try {
     const { text, voiceName = 'Kore' } = req.body;
-    if (!text) {
-      return res.status(400).json({ error: 'text is required' });
+    if (!text || typeof text !== 'string' || text.length > 2000) {
+      return res.status(400).json({ error: 'text must be a non-empty string (max 2000 characters)' });
     }
 
     // Supported voices: 'Kore', 'Puck', 'Fenrir', 'Zephyr', 'Charon'
