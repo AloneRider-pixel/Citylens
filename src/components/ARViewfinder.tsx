@@ -321,6 +321,7 @@ export const ARViewfinder: React.FC<ARViewfinderProps> = ({
               onClick={onOpenShare}
               className="p-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition-colors flex items-center gap-1"
               title="Share Landmark Tour & Card"
+              aria-label="Share Landmark Tour & Card"
             >
               <Share2 className="w-3.5 h-3.5" />
               <span className="hidden md:inline text-[11px] font-semibold">Share</span>
@@ -332,6 +333,7 @@ export const ARViewfinder: React.FC<ARViewfinderProps> = ({
             onClick={toggleFullscreen}
             className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors"
             title="Toggle Fullscreen"
+            aria-label="Toggle Fullscreen"
           >
             {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
           </button>
@@ -674,6 +676,7 @@ export const ARViewfinder: React.FC<ARViewfinderProps> = ({
               <button
                 onClick={() => onSelectPoint(null)}
                 className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                aria-label="Close details"
               >
                 <X className="w-4 h-4" />
               </button>
