@@ -625,8 +625,19 @@ Return JSON strictly:
 app.post('/api/quiz', async (req, res) => {
   try {
     const { landmarkName, city, country, historyContext } = req.body;
-    if (!landmarkName) {
-      return res.status(400).json({ error: 'landmarkName is required' });
+
+    // Security Fix: Validate string inputs and limit length to prevent DoS
+    if (!landmarkName || typeof landmarkName !== 'string' || landmarkName.length > 200) {
+      return res.status(400).json({ error: 'Valid landmarkName is required' });
+    }
+    if (city && (typeof city !== 'string' || city.length > 200)) {
+      return res.status(400).json({ error: 'Invalid city format' });
+    }
+    if (country && (typeof country !== 'string' || country.length > 200)) {
+      return res.status(400).json({ error: 'Invalid country format' });
+    }
+    if (historyContext && (typeof historyContext !== 'string' || historyContext.length > 5000)) {
+      return res.status(400).json({ error: 'Invalid historyContext format' });
     }
     if (!isValidStr(landmarkName, 100)) return res.status(400).json({ error: 'Invalid landmarkName' });
     if (city !== undefined && !isValidStr(city, 100)) return res.status(400).json({ error: 'Invalid city' });
