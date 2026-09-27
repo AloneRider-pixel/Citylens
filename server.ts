@@ -4,6 +4,8 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { GoogleGenAI, Modality } from '@google/genai';
 import { createServer as createViteServer } from 'vite';
+import { validateImageInput } from './image-validation';
+import { validateLandmarkRecognition } from './server-validation';
 
 dotenv.config();
 
@@ -68,6 +70,10 @@ function pcmToWav(pcmBuffer: Buffer, sampleRate = 24000, numChannels = 1, bitsPe
 /**
  * Utility to extract clean JSON object from Gemini response string
  */
+function isValidStr(val: any, maxLen: number): boolean {
+  return typeof val === 'string' && val.length <= maxLen;
+}
+
 function extractJson(text: string): any {
   try {
     const trimmed = text.trim();
@@ -97,17 +103,17 @@ function extractJson(text: string): any {
 app.post('/api/recognize', async (req, res) => {
   try {
     const { imageBase64, mimeType } = req.body;
-    if (!imageBase64 || typeof imageBase64 !== 'string') {
-      return res.status(400).json({ error: 'imageBase64 must be a string' });
-    }
-    // Very basic sanity check on base64 image length (prevent massive inputs)
-    if (imageBase64.length > 35000000) { // ~25MB in base64
-      return res.status(400).json({ error: 'imageBase64 is too large' });
+
+    let validatedImage: ReturnType<typeof validateImageInput>;
+    try {
+      validatedImage = validateImageInput(imageBase64, mimeType);
+    } catch (error) {
+      return res.status(400).json({
+        error: error instanceof Error ? error.message : 'Invalid image input',
+      });
     }
 
-    // Clean data URI prefix if present
-    const cleanBase64 = imageBase64.replace(/^data:image\/[a-zA-Z]+;base64,/, '');
-    const cleanMime = mimeType || 'image/jpeg';
+    const { cleanBase64, mimeType: cleanMime } = validatedImage;
 
     const prompt = `You are an expert architectural historian, urban planner, and visual tourism AI.
 Examine this city photo and identify the landmark, monument, historical building, architectural feature, or urban sight.
@@ -215,6 +221,13 @@ CRITICAL:
       resultJson = extractJson(fallbackResponse.text);
     }
 
+    try {
+      resultJson = validateLandmarkRecognition(resultJson);
+    } catch (validationError) {
+      console.error('Invalid model recognition payload:', validationError);
+      return res.status(502).json({ error: 'Model returned invalid recognition data' });
+    }
+
     resultJson.modelUsed = modelUsed;
     res.json(resultJson);
   } catch (error: any) {
@@ -233,14 +246,23 @@ app.post('/api/history', async (req, res) => {
   try {
     const { landmarkName, city, country, alternateNames } = req.body;
     if (!landmarkName || typeof landmarkName !== 'string' || landmarkName.length > 200) {
-      return res.status(400).json({ error: 'landmarkName is required and must be a string under 200 characters' });
+      return res.status(400).json({ error: 'landmarkName must be a non-empty string (max 200 characters)' });
     }
-    if (city && (typeof city !== 'string' || city.length > 100)) {
-        return res.status(400).json({ error: 'city must be a string under 100 characters' });
+    if (city !== undefined && (typeof city !== 'string' || city.length > 200)) {
+      return res.status(400).json({ error: 'city must be a string (max 200 characters)' });
     }
-    if (country && (typeof country !== 'string' || country.length > 100)) {
-        return res.status(400).json({ error: 'country must be a string under 100 characters' });
+    if (country !== undefined && (typeof country !== 'string' || country.length > 200)) {
+      return res.status(400).json({ error: 'country must be a string (max 200 characters)' });
     }
+    if (alternateNames !== undefined) {
+      if (!Array.isArray(alternateNames) || alternateNames.length > 10 ||
+          alternateNames.some((name) => typeof name !== 'string' || name.length > 200)) {
+        return res.status(400).json({ error: 'alternateNames must be an array of at most 10 strings (max 200 characters each)' });
+      }
+    }
+    if (!isValidStr(landmarkName, 100)) return res.status(400).json({ error: 'Invalid landmarkName' });
+    if (city !== undefined && !isValidStr(city, 100)) return res.status(400).json({ error: 'Invalid city' });
+    if (country !== undefined && !isValidStr(country, 100)) return res.status(400).json({ error: 'Invalid country' });
 
     const queryInfo = `${landmarkName}${city ? ` in ${city}` : ''}${country ? `, ${country}` : ''}`;
     const prompt = `Use Google Search to retrieve accurate, verified, and fascinating historical information for: "${queryInfo}".
@@ -330,9 +352,10 @@ Return ONLY valid JSON matching this schema:
 app.post('/api/tts', async (req, res) => {
   try {
     const { text, voiceName = 'Kore' } = req.body;
-    if (!text || typeof text !== 'string' || text.length > 5000) {
-      return res.status(400).json({ error: 'text is required and must be a string under 5000 characters' });
+    if (!text || typeof text !== 'string' || text.length > 2000) {
+      return res.status(400).json({ error: 'text must be a non-empty string (max 2000 characters)' });
     }
+    if (!isValidStr(text, 1000)) return res.status(400).json({ error: 'Invalid text' });
 
     // Supported voices: 'Kore', 'Puck', 'Fenrir', 'Zephyr', 'Charon'
     const allowedVoices = ['Kore', 'Puck', 'Fenrir', 'Zephyr', 'Charon'];
@@ -394,15 +417,9 @@ app.post('/api/weather', async (req, res) => {
   try {
     const { latitude, longitude, landmarkName, city, country } = req.body;
 
-    if (landmarkName && (typeof landmarkName !== 'string' || landmarkName.length > 200)) {
-        return res.status(400).json({ error: 'landmarkName must be a string under 200 characters' });
-    }
-    if (city && (typeof city !== 'string' || city.length > 100)) {
-        return res.status(400).json({ error: 'city must be a string under 100 characters' });
-    }
-    if (country && (typeof country !== 'string' || country.length > 100)) {
-        return res.status(400).json({ error: 'country must be a string under 100 characters' });
-    }
+    if (landmarkName !== undefined && !isValidStr(landmarkName, 100)) return res.status(400).json({ error: 'Invalid landmarkName' });
+    if (city !== undefined && !isValidStr(city, 100)) return res.status(400).json({ error: 'Invalid city' });
+    if (country !== undefined && !isValidStr(country, 100)) return res.status(400).json({ error: 'Invalid country' });
 
     const lat = Number(latitude) || 48.8584;
     const lng = Number(longitude) || 2.2945;
@@ -608,15 +625,23 @@ Return JSON strictly:
 app.post('/api/quiz', async (req, res) => {
   try {
     const { landmarkName, city, country, historyContext } = req.body;
+
+    // Security Fix: Validate string inputs and limit length to prevent DoS
     if (!landmarkName || typeof landmarkName !== 'string' || landmarkName.length > 200) {
-      return res.status(400).json({ error: 'landmarkName is required and must be a string under 200 characters' });
+      return res.status(400).json({ error: 'Valid landmarkName is required' });
     }
-    if (city && (typeof city !== 'string' || city.length > 100)) {
-        return res.status(400).json({ error: 'city must be a string under 100 characters' });
+    if (city && (typeof city !== 'string' || city.length > 200)) {
+      return res.status(400).json({ error: 'Invalid city format' });
     }
-    if (country && (typeof country !== 'string' || country.length > 100)) {
-        return res.status(400).json({ error: 'country must be a string under 100 characters' });
+    if (country && (typeof country !== 'string' || country.length > 200)) {
+      return res.status(400).json({ error: 'Invalid country format' });
     }
+    if (historyContext && (typeof historyContext !== 'string' || historyContext.length > 5000)) {
+      return res.status(400).json({ error: 'Invalid historyContext format' });
+    }
+    if (!isValidStr(landmarkName, 100)) return res.status(400).json({ error: 'Invalid landmarkName' });
+    if (city !== undefined && !isValidStr(city, 100)) return res.status(400).json({ error: 'Invalid city' });
+    if (country !== undefined && !isValidStr(country, 100)) return res.status(400).json({ error: 'Invalid country' });
 
     const prompt = `You are a lively, scholarly museum curator and architectural tour guide.
 Generate a fun 3-question "Landmark Challenge" trivia quiz for travelers who just finished exploring: "${landmarkName}" located in ${city || 'the city'}, ${country || ''}.
