@@ -90,7 +90,7 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
           </div>
           <button
             onClick={onOpenPassport}
-            className="px-4 py-2 rounded-xl bg-slate-900 dark:bg-amber-500 hover:bg-slate-800 dark:hover:bg-amber-400 text-amber-400 dark:text-slate-950 text-xs font-bold transition-colors flex items-center gap-1.5 shrink-0 self-start sm:self-auto cursor-pointer shadow-xs"
+            className="px-4 py-2 rounded-xl bg-slate-900 dark:bg-amber-500 hover:bg-slate-800 dark:hover:bg-amber-400 text-amber-400 dark:text-slate-950 text-xs font-bold focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-900 dark:focus-visible:ring-amber-500 transition-colors flex items-center gap-1.5 shrink-0 self-start sm:self-auto cursor-pointer shadow-xs"
           >
             <BookOpen className="w-3.5 h-3.5" />
             <span>Open Offline Passport</span>
@@ -104,6 +104,7 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
         <div
           role="button"
           tabIndex={0}
+          aria-label="Snap photo with camera"
           onClick={onOpenCamera}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -111,7 +112,7 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
               onOpenCamera();
             }
           }}
-          className="group relative cursor-pointer overflow-hidden rounded-2xl border-2 border-slate-900 dark:border-amber-500/50 bg-slate-950 dark:bg-slate-900 p-6 text-white shadow-lg hover:shadow-xl dark:hover:border-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 transition-all duration-200 flex flex-col justify-between"
+          className="group relative cursor-pointer overflow-hidden rounded-2xl border-2 border-slate-900 dark:border-amber-500/50 bg-slate-950 dark:bg-slate-900 p-6 text-white shadow-lg hover:shadow-xl dark:hover:border-amber-400 focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-500 transition-all duration-200 flex flex-col justify-between"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
           <div>
@@ -138,6 +139,7 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
         <div
           role="button"
           tabIndex={0}
+          aria-label="Upload city photo from device"
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -148,7 +150,7 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
               fileInputRef.current?.click();
             }
           }}
-          className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 transition-all duration-200 flex flex-col justify-between bg-white dark:bg-slate-900 ${
+          className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-6 focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-500 transition-all duration-200 flex flex-col justify-between bg-white dark:bg-slate-900 ${
             isDragging
               ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-950/30'
               : 'border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-amber-500/50 hover:bg-slate-50/80 dark:hover:bg-slate-850'
@@ -200,8 +202,10 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
           {SAMPLE_LANDMARKS.map((landmark) => (
             <button
               key={landmark.id}
+              type="button"
+              aria-label={`Test recognition with preset image of ${landmark.name}`}
               onClick={() => onPhotoSelected(landmark.thumbnail, landmark)}
-              className="group text-left bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-slate-400 dark:hover:border-amber-500/60 hover:shadow-md transition-all cursor-pointer flex flex-col"
+              className="group text-left bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-slate-400 dark:hover:border-amber-500/60 hover:shadow-md focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-500 transition-all cursor-pointer flex flex-col"
             >
               <div className="relative aspect-4/3 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
                 <img
