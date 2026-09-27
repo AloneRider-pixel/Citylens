@@ -305,6 +305,7 @@ export const ShareTourModal: React.FC<ShareTourModalProps> = ({
           </div>
           <button
             onClick={onClose}
+            aria-label="Close share modal"
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
@@ -445,11 +446,12 @@ export const ShareTourModal: React.FC<ShareTourModalProps> = ({
 
           {/* Section 2: Shareable Web Link */}
           <div className="border-t border-slate-200 dark:border-slate-800 pt-5">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+            <label htmlFor="share-url-input" className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
               Shareable Tour Link
             </label>
             <div className="flex items-center gap-2">
               <input
+                id="share-url-input"
                 type="text"
                 readOnly
                 value={shareUrl}
