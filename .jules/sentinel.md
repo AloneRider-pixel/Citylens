@@ -8,7 +8,7 @@
 **Learning:** Broadly applying large payload limits for the convenience of a single endpoint (like image upload) compromises the security of the entire application API.
 **Prevention:** Always apply large payload limits route-specifically (e.g., `app.use('/api/recognize', express.json({ limit: '25mb' }))`), and use a strict, small default limit (e.g., `100kb`) globally for all other routes to mitigate memory exhaustion risks.
 
-## 2024-05-24 - [Input Length Validation for AI Endpoints]
-**Vulnerability:** Endpoints fetching data from the Gemini AI SDK (`/api/history`, `/api/tts`, `/api/quiz`) were accepting unbounded string inputs. This allows token exhaustion and financial DoS attacks because large texts are directly processed by the model without checks.
-**Learning:** External AI models have token limits and are typically billed per token. While global body payload limits (e.g. 100kb) protect the memory from DoS, they are insufficient for generation endpoints where slightly larger but valid-looking inputs could unnecessarily drain financial resources.
-**Prevention:** Apply rigorous length validations on all strings sent as prompts or context to AI SDKs. Fail with a 400 Bad Request error early if lengths exceed sane limits.
+## 2024-05-24 - [Enforce Explicit Type and Length Checks to Prevent express.json() Bypasses]
+**Vulnerability:** Endpoints handling generation (e.g., Gemini prompts) lacked explicit string length validation on `req.body` parameters, making them vulnerable to token exhaustion or DoS via very large inputs. Furthermore, simply checking `.length` is insufficient when using `express.json()`, because array payloads pass the check by having a small element count (e.g., `['huge string'].length === 1`), bypassing string length limits.
+**Learning:** `express.json()` parses inputs into their original JSON types. If you expect a string, checking `.length` on an array returns the number of elements, completely circumventing string character length limits and allowing massive payload injection to backend APIs.
+**Prevention:** Always explicitly check type before checking length (e.g., `typeof input === 'string' && input.length <= MAX_LENGTH`) on all dynamically generated endpoints processing user data.
