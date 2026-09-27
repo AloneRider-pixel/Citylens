@@ -271,6 +271,18 @@ app.post('/api/history', async (req, res) => {
     if (city !== undefined && !isValidStr(city, 100)) return res.status(400).json({ error: 'Invalid city' });
     if (country !== undefined && !isValidStr(country, 100)) return res.status(400).json({ error: 'Invalid country' });
 
+    // Security enhancement: Input length validation to prevent token exhaustion / DoS
+    if (
+      (typeof landmarkName !== 'string' || landmarkName.length > 200) ||
+      (city && (typeof city !== 'string' || city.length > 200)) ||
+      (country && (typeof country !== 'string' || country.length > 200))
+    ) {
+      return res.status(400).json({ error: 'Input fields must be strings and not exceed maximum allowed length' });
+    }
+    if (alternateNames && Array.isArray(alternateNames) && alternateNames.some(name => typeof name !== 'string' || name.length > 200)) {
+      return res.status(400).json({ error: 'alternateNames exceeds maximum allowed length' });
+    }
+
     const queryInfo = `${landmarkName}${city ? ` in ${city}` : ''}${country ? `, ${country}` : ''}`;
     const prompt = `Use Google Search to retrieve accurate, verified, and fascinating historical information for: "${queryInfo}".
 Also consider aliases: ${alternateNames ? alternateNames.join(', ') : 'none'}.
@@ -363,6 +375,11 @@ app.post('/api/tts', async (req, res) => {
       return res.status(400).json({ error: 'text must be a non-empty string (max 2000 characters)' });
     }
     if (!isValidStr(text, 1000)) return res.status(400).json({ error: 'Invalid text' });
+
+    // Security enhancement: Input length validation to prevent token exhaustion / DoS
+    if (typeof text !== 'string' || text.length > 2000) {
+      return res.status(400).json({ error: 'text exceeds maximum allowed length' });
+    }
 
     // Supported voices: 'Kore', 'Puck', 'Fenrir', 'Zephyr', 'Charon'
     const allowedVoices = ['Kore', 'Puck', 'Fenrir', 'Zephyr', 'Charon'];
@@ -649,6 +666,15 @@ app.post('/api/quiz', async (req, res) => {
     if (!isValidStr(landmarkName, 100)) return res.status(400).json({ error: 'Invalid landmarkName' });
     if (city !== undefined && !isValidStr(city, 100)) return res.status(400).json({ error: 'Invalid city' });
     if (country !== undefined && !isValidStr(country, 100)) return res.status(400).json({ error: 'Invalid country' });
+
+    // Security enhancement: Input length validation to prevent token exhaustion / DoS
+    if (
+      (typeof landmarkName !== 'string' || landmarkName.length > 200) ||
+      (city && (typeof city !== 'string' || city.length > 200)) ||
+      (country && (typeof country !== 'string' || country.length > 200))
+    ) {
+      return res.status(400).json({ error: 'Input fields must be strings and not exceed maximum allowed length' });
+    }
 
     const prompt = `You are a lively, scholarly museum curator and architectural tour guide.
 Generate a fun 3-question "Landmark Challenge" trivia quiz for travelers who just finished exploring: "${landmarkName}" located in ${city || 'the city'}, ${country || ''}.
