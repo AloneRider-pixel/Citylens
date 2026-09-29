@@ -28,10 +28,10 @@ interface LandmarkChallengeQuizProps {
   history: LandmarkHistoryResult;
 }
 
-export const LandmarkChallengeQuiz: React.FC<LandmarkChallengeQuizProps> = React.memo(({
+export const LandmarkChallengeQuiz = React.memo(({
   recognition,
   history,
-}) => {
+}: LandmarkChallengeQuizProps) => {
   const [quizData, setQuizData] = useState<LandmarkQuizResult | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasStarted, setHasStarted] = useState<boolean>(false);

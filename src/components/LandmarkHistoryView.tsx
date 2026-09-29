@@ -19,10 +19,10 @@ interface LandmarkHistoryViewProps {
   history: LandmarkHistoryResult;
 }
 
-export const LandmarkHistoryView: React.FC<LandmarkHistoryViewProps> = React.memo(({
+export const LandmarkHistoryView = React.memo(({
   recognition,
   history,
-}) => {
+}: LandmarkHistoryViewProps) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'timeline' | 'secrets' | 'sources'>('overview');
 
   return (

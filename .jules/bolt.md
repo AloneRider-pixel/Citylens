@@ -6,6 +6,6 @@
 **Learning:** Performing multiple iterations (like O(n) array `.map`, `.reduce` or `new Set`) on arrays inside a render function leads to redundant work on each re-render, even if the source data hasn't changed.
 **Action:** Wrapped these modal statistics calculations inside `useMemo` so they're only computed once when the data (`savedTours`) changes. I also reduced multiple iterations of the array to a single loop.
 
-## 2023-11-04 - Optimization of high-frequency 3D render loops in VR components
-**Learning:** Re-computing and re-mapping arrays to generate complex 3D CSS structures (like VR panaroma meshes or compass dials) inside the render loop causes significant layout thrashing when the parent component updates at 60FPS (e.g., via device gyroscope `pitch`/`yaw`). Even if the data doesn't change, React rebuilds the deep div tree inline.
-**Action:** Extract fully static elements (like compass degree tapes) outside the component completely. For dynamic but low-frequency updating 3D meshes (like the cylinder projection that only depends on `imageSrc` and constant panels), wrap them in `useMemo` so the 3D element tree is only built once, saving immense diffing costs during high-FPS camera rotations.
+## 2023-10-25 - Optimization of static components re-rendering
+**Learning:** In a single-page app where modals or global state changes frequently (like `isPassportOpen` in `App.tsx`), heavy components like map views (`LandmarkMapView`), complex tabs (`LandmarkHistoryView`), and quizzes (`LandmarkChallengeQuiz`) will unnecessarily re-render on every state toggle, even when their props haven't changed. This can cause UI stutter.
+**Action:** Wrapped these heavy, leaf-node components in `React.memo` since they only depend on stable props (`recognition` and `history` objects) and don't need to update when sibling state changes.
