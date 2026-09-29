@@ -8,7 +8,7 @@
 **Learning:** Broadly applying large payload limits for the convenience of a single endpoint (like image upload) compromises the security of the entire application API.
 **Prevention:** Always apply large payload limits route-specifically (e.g., `app.use('/api/recognize', express.json({ limit: '25mb' }))`), and use a strict, small default limit (e.g., `100kb`) globally for all other routes to mitigate memory exhaustion risks.
 
-## 2024-05-24 - [Enforce Explicit Type and Length Checks to Prevent express.json() Bypasses]
-**Vulnerability:** Endpoints handling generation (e.g., Gemini prompts) lacked explicit string length validation on `req.body` parameters, making them vulnerable to token exhaustion or DoS via very large inputs. Furthermore, simply checking `.length` is insufficient when using `express.json()`, because array payloads pass the check by having a small element count (e.g., `['huge string'].length === 1`), bypassing string length limits.
-**Learning:** `express.json()` parses inputs into their original JSON types. If you expect a string, checking `.length` on an array returns the number of elements, completely circumventing string character length limits and allowing massive payload injection to backend APIs.
-**Prevention:** Always explicitly check type before checking length (e.g., `typeof input === 'string' && input.length <= MAX_LENGTH`) on all dynamically generated endpoints processing user data.
+## 2024-05-24 - [Input Validation to Prevent AI Token DoS]
+**Vulnerability:** Endpoints querying large language models (like `/api/tts` and `/api/history`) had no strict input length limits. Even with a 100kb payload limit, users could send roughly 25,000 characters to LLM/TTS APIs.
+**Learning:** There is a critical difference between standard HTTP payload limits (protecting memory/bandwidth) and AI Model input limits (protecting against severe token exhaustion and financial Denial of Service). A "small" payload in HTTP terms can be a massive payload in LLM context terms.
+**Prevention:** Always implement explicit string length validation for any user-provided data passed into generative AI APIs, independent of basic JSON payload size limits.
