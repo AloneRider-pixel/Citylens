@@ -97,12 +97,6 @@ function extractJson(text: string): any {
   }
 }
 
-/**
- * Validates that an input is strictly a string and within a maximum length
- * Security enhancement: Prevents payload bypasses where an array length might be
- * checked instead of string character count.
- */
-const isValidStr = (val: any, maxLen: number) => typeof val === 'string' && val.length <= maxLen;
 
 // ----------------------------------------------------------------------------
 // API ROUTE 1: AI Landmark Recognition using gemini-3.1-pro-preview
