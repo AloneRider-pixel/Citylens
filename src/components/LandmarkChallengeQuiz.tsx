@@ -28,7 +28,7 @@ interface LandmarkChallengeQuizProps {
   history: LandmarkHistoryResult;
 }
 
-export const LandmarkChallengeQuiz: React.FC<LandmarkChallengeQuizProps> = ({
+export const LandmarkChallengeQuiz: React.FC<LandmarkChallengeQuizProps> = React.memo(({
   recognition,
   history,
 }) => {
@@ -472,4 +472,4 @@ export const LandmarkChallengeQuiz: React.FC<LandmarkChallengeQuizProps> = ({
       </div>
     </section>
   );
-};
+});
