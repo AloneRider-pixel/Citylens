@@ -12,3 +12,8 @@
 **Vulnerability:** Endpoints handling generation (e.g., Gemini prompts) lacked explicit string length validation on `req.body` parameters, making them vulnerable to token exhaustion or DoS via very large inputs. Furthermore, simply checking `.length` is insufficient when using `express.json()`, because array payloads pass the check by having a small element count (e.g., `['huge string'].length === 1`), bypassing string length limits.
 **Learning:** `express.json()` parses inputs into their original JSON types. If you expect a string, checking `.length` on an array returns the number of elements, completely circumventing string character length limits and allowing massive payload injection to backend APIs.
 **Prevention:** Always explicitly check type before checking length (e.g., `typeof input === 'string' && input.length <= MAX_LENGTH`) on all dynamically generated endpoints processing user data.
+
+## 2024-05-24 - [Implement Content Security Policy (CSP) Headers]
+**Vulnerability:** The application was missing a Content-Security-Policy header, leaving it susceptible to Cross-Site Scripting (XSS) and data injection attacks.
+**Learning:** Without a CSP, the browser has no instructions on which sources are trusted to load resources from (scripts, styles, images, etc.). This allows attackers to inject malicious content that the browser will execute.
+**Prevention:** Always implement a robust CSP header (`Content-Security-Policy`) that strictly limits the origins from which content can be loaded, using directives like `default-src 'self'` and explicitly allowing only necessary external domains.
