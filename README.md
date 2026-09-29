@@ -116,10 +116,3 @@ pnpm build
 ## License
 
 MIT
-
-
-## Evidence and reproducibility
-
-CityLens distinguishes application-level validation from real-world recognition quality. The repository does not treat deterministic fixtures as production accuracy evidence. Any measured recognition, latency, coverage, or reliability result should include the dataset, model/provider, sample count, method, environment, and producing commit.
-
-See [Evidence Policy](docs/evidence-policy.md).
