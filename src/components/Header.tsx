@@ -100,9 +100,10 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Voice Selector */}
           <div className="relative flex items-center bg-slate-100/90 dark:bg-slate-900 rounded-lg px-2.5 py-1.5 border border-slate-200 dark:border-slate-700 text-xs">
             <Volume2 className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 mr-1.5" />
-            <span className="text-slate-500 dark:text-slate-400 mr-1.5 hidden md:inline">Voice:</span>
+            <label htmlFor="voice-select" className="text-slate-500 dark:text-slate-400 mr-1.5 hidden md:inline">Voice:</label>
             <select
               id="voice-select"
+              aria-label="Select narrator voice"
               value={selectedVoice}
               onChange={(e) => onSelectVoice(e.target.value)}
               className="bg-transparent font-medium text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer pr-1"

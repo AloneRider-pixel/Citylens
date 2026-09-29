@@ -28,6 +28,31 @@ interface VRPanoramaViewerProps {
   filterStyle?: string;
 }
 
+const COMPASS_TAPE_ELEMENTS = [0, 45, 90, 135, 180, 225, 270, 315, 360, 405, 450, 495, 540, 585, 630, 675, 720].map((d, idx) => {
+  const norm = d % 360;
+  const label =
+    norm === 0
+      ? 'N'
+      : norm === 90
+      ? 'E'
+      : norm === 180
+      ? 'S'
+      : norm === 270
+      ? 'W'
+      : `${norm}°`;
+  const isMajor = norm % 90 === 0;
+  return (
+    <span
+      key={idx}
+      className={`${
+        isMajor ? 'font-bold text-amber-400 text-[11px]' : 'text-slate-500'
+      }`}
+    >
+      {label}
+    </span>
+  );
+});
+
 export const VRPanoramaViewer: React.FC<VRPanoramaViewerProps> = ({
   imageSrc,
   recognition,
@@ -310,6 +335,73 @@ export const VRPanoramaViewer: React.FC<VRPanoramaViewerProps> = ({
     return panels;
   }, []);
 
+  const cylinderMeshElements = useMemo(() => {
+    return cylinderPanels.map((panel) => {
+      // Calculate panel width based on circumference: 2 * pi * r / N
+      const panelWidth = Math.ceil((2 * Math.PI * panel.radius) / CYLINDER_SEGMENTS) + 4;
+      const panelHeight = 720;
+
+      return (
+        <div
+          key={panel.index}
+          className="absolute -translate-x-1/2 -translate-y-1/2 backface-hidden overflow-hidden"
+          style={{
+            width: `${panelWidth}px`,
+            height: `${panelHeight}px`,
+            transform: `rotateY(${panel.angle}deg) translateZ(${panel.radius}px)`,
+            transformStyle: 'preserve-3d',
+          }}
+        >
+          {/* Frontal Facets Display High-Resolution Geometric Landmark Projection */}
+          {panel.isFrontFacing ? (
+            <div className="w-full h-full relative overflow-hidden bg-slate-900">
+              <img
+                src={imageSrc}
+                alt={recognition.landmarkName}
+                referrerPolicy="no-referrer"
+                className="absolute max-w-none h-full object-cover"
+                style={{
+                  width: `${panelWidth * 4}px`,
+                  left: `${-((panel.angle <= 60 ? panel.angle : panel.angle - 360) + 60) * (panelWidth / 30)}px`,
+                  filter: filterStyle,
+                }}
+              />
+              {/* Geometric Perspective Edge Shading */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20 pointer-events-none" />
+              {/* Architectural Vector Grid Overlay */}
+              <div
+                className="absolute inset-0 opacity-15 pointer-events-none"
+                style={{
+                  backgroundImage:
+                    'linear-gradient(to right, rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.3) 1px, transparent 1px)',
+                  backgroundSize: '40px 40px',
+                }}
+              />
+            </div>
+          ) : (
+            /* Rear & Flank Ambient Environment (Night Sky & Architectural Wireframe Panorama) */
+            <div className="w-full h-full bg-gradient-to-b from-slate-950 via-slate-900 to-indigo-950/60 border border-slate-800/40 relative flex flex-col justify-between p-4">
+              {/* Ambient stars */}
+              <div
+                className="absolute inset-0 opacity-30"
+                style={{
+                  backgroundImage:
+                    'radial-gradient(circle at 20% 30%, #fff 1px, transparent 1px), radial-gradient(circle at 80% 70%, #38bdf8 1px, transparent 1px)',
+                  backgroundSize: '60px 60px, 90px 90px',
+                }}
+              />
+              {/* Distant City Skyline Wireframe */}
+              <div className="absolute bottom-0 inset-x-0 h-32 opacity-20 border-t border-cyan-500/30 bg-gradient-to-t from-cyan-950/40 to-transparent" />
+              <div className="relative text-[10px] font-mono text-slate-500 uppercase tracking-widest text-center">
+                PANORAMA EXTENSION • {Math.round(panel.angle)}°
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    });
+  }, [cylinderPanels, imageSrc, recognition.landmarkName, filterStyle]);
+
   // Render Single VR Eye Viewport (used once in mono, twice in cardboard split mode)
   const renderEyeViewport = (eyeOffset: number = 0, isRightEye: boolean = false) => {
     // Camera rotation matrix
@@ -369,70 +461,7 @@ export const VRPanoramaViewer: React.FC<VRPanoramaViewerProps> = ({
             </div>
 
             {/* 360° Cylindrical Projection Mesh */}
-            {cylinderPanels.map((panel) => {
-              // Calculate panel width based on circumference: 2 * pi * r / N
-              const panelWidth = Math.ceil((2 * Math.PI * panel.radius) / CYLINDER_SEGMENTS) + 4;
-              const panelHeight = 720;
-
-              return (
-                <div
-                  key={panel.index}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 backface-hidden overflow-hidden"
-                  style={{
-                    width: `${panelWidth}px`,
-                    height: `${panelHeight}px`,
-                    transform: `rotateY(${panel.angle}deg) translateZ(${panel.radius}px)`,
-                    transformStyle: 'preserve-3d',
-                  }}
-                >
-                  {/* Frontal Facets Display High-Resolution Geometric Landmark Projection */}
-                  {panel.isFrontFacing ? (
-                    <div className="w-full h-full relative overflow-hidden bg-slate-900">
-                      <img
-                        src={imageSrc}
-                        alt={recognition.landmarkName}
-                        referrerPolicy="no-referrer"
-                        className="absolute max-w-none h-full object-cover"
-                        style={{
-                          width: `${panelWidth * 4}px`,
-                          left: `${-((panel.angle <= 60 ? panel.angle : panel.angle - 360) + 60) * (panelWidth / 30)}px`,
-                          filter: filterStyle,
-                        }}
-                      />
-                      {/* Geometric Perspective Edge Shading */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20 pointer-events-none" />
-                      {/* Architectural Vector Grid Overlay */}
-                      <div
-                        className="absolute inset-0 opacity-15 pointer-events-none"
-                        style={{
-                          backgroundImage:
-                            'linear-gradient(to right, rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.3) 1px, transparent 1px)',
-                          backgroundSize: '40px 40px',
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    /* Rear & Flank Ambient Environment (Night Sky & Architectural Wireframe Panorama) */
-                    <div className="w-full h-full bg-gradient-to-b from-slate-950 via-slate-900 to-indigo-950/60 border border-slate-800/40 relative flex flex-col justify-between p-4">
-                      {/* Ambient stars */}
-                      <div
-                        className="absolute inset-0 opacity-30"
-                        style={{
-                          backgroundImage:
-                            'radial-gradient(circle at 20% 30%, #fff 1px, transparent 1px), radial-gradient(circle at 80% 70%, #38bdf8 1px, transparent 1px)',
-                          backgroundSize: '60px 60px, 90px 90px',
-                        }}
-                      />
-                      {/* Distant City Skyline Wireframe */}
-                      <div className="absolute bottom-0 inset-x-0 h-32 opacity-20 border-t border-cyan-500/30 bg-gradient-to-t from-cyan-950/40 to-transparent" />
-                      <div className="relative text-[10px] font-mono text-slate-500 uppercase tracking-widest text-center">
-                        PANORAMA EXTENSION • {Math.round(panel.angle)}°
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            {cylinderMeshElements}
 
             {/* 3D Spatial Floating AR Hotspot Beacons */}
             {spatialPoints.map((point) => {
@@ -666,32 +695,7 @@ export const VRPanoramaViewer: React.FC<VRPanoramaViewerProps> = ({
                 }}
               >
                 {/* 720-degree extended strip for smooth wrapping */}
-                {[0, 45, 90, 135, 180, 225, 270, 315, 360, 405, 450, 495, 540, 585, 630, 675, 720].map(
-                  (d, idx) => {
-                    const norm = d % 360;
-                    const label =
-                      norm === 0
-                        ? 'N'
-                        : norm === 90
-                        ? 'E'
-                        : norm === 180
-                        ? 'S'
-                        : norm === 270
-                        ? 'W'
-                        : `${norm}°`;
-                    const isMajor = norm % 90 === 0;
-                    return (
-                      <span
-                        key={idx}
-                        className={`${
-                          isMajor ? 'font-bold text-amber-400 text-[11px]' : 'text-slate-500'
-                        }`}
-                      >
-                        {label}
-                      </span>
-                    );
-                  }
-                )}
+                {COMPASS_TAPE_ELEMENTS}
               </div>
             </div>
           </div>
@@ -748,7 +752,8 @@ export const VRPanoramaViewer: React.FC<VRPanoramaViewerProps> = ({
                     </div>
                     <button
                       onClick={() => onSelectPoint(null)}
-                      className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                      aria-label="Close detail view"
+                      className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
                     >
                       <X className="w-4 h-4" />
                     </button>
