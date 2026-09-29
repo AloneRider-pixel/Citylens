@@ -68,7 +68,10 @@ function pcmToWav(pcmBuffer: Buffer, sampleRate = 24000, numChannels = 1, bitsPe
 }
 
 /**
- * Utility to extract clean JSON object from Gemini response string
+ * Utility to extract clean JSON object from Gemini response string.
+ * Validates that an input is strictly a string and within a maximum length
+ * Security enhancement: Prevents payload bypasses where an array length might be
+ * checked instead of string character count.
  */
 function isValidStr(val: any, maxLen: number): boolean {
   return typeof val === 'string' && val.length <= maxLen;
@@ -96,13 +99,6 @@ function extractJson(text: string): any {
     throw new Error('Failed to parse structured JSON from model output');
   }
 }
-
-/**
- * Validates that an input is strictly a string and within a maximum length
- * Security enhancement: Prevents payload bypasses where an array length might be
- * checked instead of string character count.
- */
-const isValidStr = (val: any, maxLen: number) => typeof val === 'string' && val.length <= maxLen;
 
 // ----------------------------------------------------------------------------
 // API ROUTE 1: AI Landmark Recognition using gemini-3.1-pro-preview
