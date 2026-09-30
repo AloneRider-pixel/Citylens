@@ -5,3 +5,7 @@
 ## 2026-09-26 - Missing Keyboard and Screen Reader Accessibility on Custom Div Buttons
 **Learning:** Found multiple instances where critical interactive elements (like the main camera and upload cards in PhotoUploader) were built as `div` elements relying solely on `onClick`, completely blocking keyboard users (Tab navigation, Enter/Space activation) and hiding their interactive nature from screen readers.
 **Action:** Always verify that any interactive element not using a semantic `<button>` or `<a>` tag receives `role="button"`, `tabIndex={0}`, `onKeyDown` support, descriptive `aria-label` (if icon-only or visually complex), and explicit `focus-visible` styling for keyboard focus indication.
+
+## 2026-09-30 - Missing ARIA Labels on Icon-only Utilities
+**Learning:** Found an instance in RealtimeWeatherWidget where a utility action button (refresh) relied solely on the `title` attribute without providing an accessible name, making it inaccessible to screen reader users relying on interactive element lists rather than hover states.
+**Action:** Always provide an explicit `aria-label` for all icon-only utility buttons, rather than relying exclusively on `title` attributes, to ensure robust screen reader compatibility.
