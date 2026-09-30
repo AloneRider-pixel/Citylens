@@ -28,6 +28,39 @@ app.use('/api/recognize', express.json({ limit: '25mb' }));
 // Security enhancement: Use a strict 100kb limit for all other routes to prevent payload-based DoS attacks
 app.use(express.json({ limit: '100kb' }));
 
+// Security enhancement: Implement basic IP-based rate limiting to prevent automated DoS and token exhaustion on expensive AI endpoints
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+app.use('/api', (req, res, next) => {
+  const ip = req.ip || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  const windowMs = 60 * 1000; // 1 minute window
+
+  let record = rateLimitMap.get(ip);
+  if (!record || now > record.resetTime) {
+    record = { count: 0, resetTime: now + windowMs };
+  }
+
+  record.count++;
+  rateLimitMap.set(ip, record);
+
+  // Allow 50 requests per minute per IP. Clean up old entries periodically.
+  if (record.count > 50) {
+    return res.status(429).json({ error: 'Too many requests, please try again later.' });
+  }
+
+  next();
+});
+
+// Periodic cleanup to prevent memory leaks and avoid blocking the event loop on requests
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of rateLimitMap.entries()) {
+    if (now > value.resetTime) {
+      rateLimitMap.delete(key);
+    }
+  }
+}, 60 * 1000); // Run every minute
+
 // Initialize GoogleGenAI SDK with required user-agent
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
