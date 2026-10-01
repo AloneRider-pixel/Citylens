@@ -123,3 +123,11 @@ MIT
 CityLens distinguishes application-level validation from real-world recognition quality. The repository does not treat deterministic fixtures as production accuracy evidence. Any measured recognition, latency, coverage, or reliability result should include the dataset, model/provider, sample count, method, environment, and producing commit.
 
 See [Evidence Policy](docs/evidence-policy.md).
+
+## Repository review path
+
+Review [SECURITY.md](SECURITY.md) and [verification](docs/verification.md), then run `pnpm lint`, `pnpm test`, and `pnpm build`. The server-side `/api` boundary is the security-sensitive path because it owns external provider credentials and expensive model calls.
+
+## Maintenance standard
+
+Keep provider credentials server-side, retain request-size and rate controls, validate model responses, and use a shared edge/store-based rate limiter when operating multiple application instances.
