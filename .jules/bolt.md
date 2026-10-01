@@ -9,3 +9,7 @@
 ## 2023-11-04 - Optimization of high-frequency 3D render loops in VR components
 **Learning:** Re-computing and re-mapping arrays to generate complex 3D CSS structures (like VR panaroma meshes or compass dials) inside the render loop causes significant layout thrashing when the parent component updates at 60FPS (e.g., via device gyroscope `pitch`/`yaw`). Even if the data doesn't change, React rebuilds the deep div tree inline.
 **Action:** Extract fully static elements (like compass degree tapes) outside the component completely. For dynamic but low-frequency updating 3D meshes (like the cylinder projection that only depends on `imageSrc` and constant panels), wrap them in `useMemo` so the 3D element tree is only built once, saving immense diffing costs during high-FPS camera rotations.
+
+## 2024-05-18 - [App Header Re-rendering]
+**Learning:** Top-level components like Header receive many props and re-render every time the main App state changes, even when their props haven't changed.
+**Action:** Always wrap top-level layout components like Header in React.memo and use useCallback for the functions passed to them to prevent unnecessary re-renders cascading from parent state updates.
