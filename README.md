@@ -1,39 +1,37 @@
-# CityLens
+# 🌆 CityLens
 
 [![CI](https://github.com/AloneRider-pixel/Citylens/actions/workflows/ci.yml/badge.svg)](https://github.com/AloneRider-pixel/Citylens/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/AloneRider-pixel/Citylens/actions/workflows/codeql.yml/badge.svg)](https://github.com/AloneRider-pixel/Citylens/actions/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**AI-powered city and landmark exploration web application.**
+AI-powered city and landmark exploration app built around server-side vision inference, structured results, maps, and a PWA experience.
 
-CityLens accepts a city/landmark photo, sends it through a server-side Gemini vision integration, normalizes the result into structured data, and presents the recognition result together with nearby points of interest on an interactive map.
+## Product flow
 
-> **Portfolio focus:** React + TypeScript + Node.js + Gemini vision + geospatial UI + PWA engineering.
-
-## Architecture
-
-```mermaid
-graph LR
-    PHOTO[User Photo]
-    UI[React + TypeScript]
-    API[Express API]
-    GEMINI[Gemini Vision]
-    RESULT[Structured Landmark Result]
-    MAP[Interactive Map + Nearby POIs]
-
-    PHOTO --> UI --> API --> GEMINI --> RESULT --> MAP
+```text
+Photo
+  ↓
+React + TypeScript UI
+  ↓
+Express API boundary
+  ↓
+Gemini Vision
+  ↓
+Normalized landmark result
+  ↓
+Map + nearby points of interest
 ```
 
 ## Engineering highlights
 
-- Gemini credentials stay on the server rather than in the browser bundle.
-- API responses are normalized before reaching the UI.
-- Image request bodies are bounded to avoid unbounded payload growth.
-- Security headers are applied at the server boundary.
-- Recognition and map functionality are separated so the geospatial experience is not coupled to model execution.
-- CI performs dependency installation, type/lint validation, and a production build.
-- Dependabot and CodeQL provide dependency and static-analysis automation.
-- PWA service-worker support enables an installable web experience.
+- Gemini credentials remain server-side.
+- Request payloads are bounded before expensive provider calls.
+- Server-side security headers protect the API boundary.
+- Model responses are normalized before reaching the UI.
+- PWA service-worker support provides an installable web experience.
+- CI validates dependency installation, lint/type checks, tests, build, CodeQL, dependency review, and synthetic checks.
 
-## Technology stack
+## Stack
 
 | Layer | Technology |
 |---|---|
@@ -42,32 +40,27 @@ graph LR
 | AI | Google Gemini SDK |
 | Maps | Leaflet |
 | Styling | Tailwind CSS |
-| UX | Motion, Lucide React |
-| Platform | PWA service worker |
-| Quality | GitHub Actions, TypeScript checks |
+| Platform | PWA |
+| CI/security | GitHub Actions, CodeQL, Dependabot, Scorecard |
 
-## Repository structure
+## Repository layout
 
 ```text
-Citylens/
-├── src/
-│   ├── components/             # UI components
-│   ├── context/                # Application state
-│   ├── data/                   # Local application data
-│   ├── services/               # External/API services
-│   ├── App.tsx
-│   ├── main.tsx
-│   ├── types.ts
-│   └── serviceWorkerRegistration.ts
-├── server.ts                   # Express + Gemini API boundary
-├── vite.config.ts
-├── package.json
-└── .github/workflows/ci.yml
+src/
+  components/
+  context/
+  data/
+  services/
+server.ts
+image-validation.ts
+server-validation.ts
+public/
+package.json
+pnpm-lock.yaml
+.github/workflows/
 ```
 
-## Local development
-
-### Setup
+## Quick start
 
 ```bash
 git clone https://github.com/AloneRider-pixel/Citylens.git
@@ -76,58 +69,56 @@ cp .env.example .env
 pnpm install
 ```
 
-Set the server-side API key in `.env`:
+Set the server-side key:
 
 ```text
 GEMINI_API_KEY=your_key_here
 ```
 
-Never commit a real API credential.
+Never commit a real credential.
 
-### Run
+Start the app:
 
 ```bash
 pnpm dev
 ```
 
-### Quality checks
+## Verification
 
 ```bash
+pnpm install --frozen-lockfile
 pnpm lint
+pnpm test
 pnpm build
 ```
 
-## Security considerations
+The API security-sensitive path is `server.ts` and the associated validation modules.
 
-- Keep `GEMINI_API_KEY` server-side.
-- Validate uploaded image MIME types and payload size before public deployment.
-- Add authentication and rate limiting before exposing the recognition endpoint at scale.
-- Treat model-generated coordinates and nearby-POI information as unverified unless independently validated.
+## Security
+
+Keep provider credentials server-side, enforce request-size/MIME controls, retain rate limiting before high-scale public deployment, and independently validate model-generated coordinates/POI data.
+
+The repository's CI uses immutable GitHub Action SHAs and least-privilege workflow permissions.
+
+## Evidence and reproducibility
+
+Deterministic validation proves application behavior, not real-world landmark-recognition accuracy. Any published recognition, reliability, latency, or coverage result should state provider/model, dataset, sample count, method, environment, and producing commit.
 
 ## Roadmap
 
-- Unit/integration tests for the recognition API boundary.
-- Runtime schema validation for model/API responses.
-- API rate limiting and structured request logging.
-- Versioned evaluation set for landmark-recognition quality.
-- Provider abstraction for additional vision models.
-- Geospatial result verification and caching.
+- Expand server/API integration coverage.
+- Runtime schema validation for model responses.
+- Versioned landmark evaluation dataset.
+- Provider abstraction and geospatial result verification.
+
+## Review path
+
+Start with [SECURITY.md](SECURITY.md) and [verification](docs/verification.md), then inspect `server.ts`, validation modules, and provider integration before changing public API behavior.
+
+## Maintenance standard
+
+Keep secrets off the client, keep request/rate controls active, validate external data, and preserve reproducibility of test fixtures.
 
 ## License
 
 MIT
-
-
-## Evidence and reproducibility
-
-CityLens distinguishes application-level validation from real-world recognition quality. The repository does not treat deterministic fixtures as production accuracy evidence. Any measured recognition, latency, coverage, or reliability result should include the dataset, model/provider, sample count, method, environment, and producing commit.
-
-See [Evidence Policy](docs/evidence-policy.md).
-
-## Repository review path
-
-Review [SECURITY.md](SECURITY.md) and [verification](docs/verification.md), then run `pnpm lint`, `pnpm test`, and `pnpm build`. The server-side `/api` boundary is the security-sensitive path because it owns external provider credentials and expensive model calls.
-
-## Maintenance standard
-
-Keep provider credentials server-side, retain request-size and rate controls, validate model responses, and use a shared edge/store-based rate limiter when operating multiple application instances.
