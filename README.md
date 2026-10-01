@@ -1,35 +1,35 @@
-# 🌆 CityLens
+# CityLens — AI City & Landmark Explorer
 
 [![CI](https://github.com/AloneRider-pixel/Citylens/actions/workflows/ci.yml/badge.svg)](https://github.com/AloneRider-pixel/Citylens/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/AloneRider-pixel/Citylens/actions/workflows/codeql.yml/badge.svg)](https://github.com/AloneRider-pixel/Citylens/actions/workflows/codeql.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-AI-powered city and landmark exploration app built around server-side vision inference, structured results, maps, and a PWA experience.
+AI-powered city and landmark exploration web app built around server-side vision inference, validated responses, maps, and a progressive web app experience.
 
 ## Product flow
 
 ```text
 Photo
   ↓
-React + TypeScript UI
+React + TypeScript
   ↓
-Express API boundary
+Express API
   ↓
 Gemini Vision
   ↓
-Normalized landmark result
+Validated landmark result
   ↓
-Map + nearby points of interest
+Map / nearby points of interest
 ```
 
 ## Engineering highlights
 
-- Gemini credentials remain server-side.
-- Request payloads are bounded before expensive provider calls.
-- Server-side security headers protect the API boundary.
+- Gemini credentials stay server-side.
+- Request size and content controls protect expensive provider calls.
+- API security headers and rate limiting protect the public boundary.
 - Model responses are normalized before reaching the UI.
 - PWA service-worker support provides an installable web experience.
-- CI validates dependency installation, lint/type checks, tests, build, CodeQL, dependency review, and synthetic checks.
+- CI covers install, lint, type checking, tests, build, CodeQL, dependency review, Scorecard, and synthetic validation.
 
 ## Stack
 
@@ -41,16 +41,13 @@ Map + nearby points of interest
 | Maps | Leaflet |
 | Styling | Tailwind CSS |
 | Platform | PWA |
-| CI/security | GitHub Actions, CodeQL, Dependabot, Scorecard |
+| Security/CI | GitHub Actions, CodeQL, Dependabot, Scorecard |
 
-## Repository layout
+## Repository map
 
 ```text
-src/
-  components/
-  context/
-  data/
-  services/
+src/components/
+src/services/
 server.ts
 image-validation.ts
 server-validation.ts
@@ -66,22 +63,17 @@ pnpm-lock.yaml
 git clone https://github.com/AloneRider-pixel/Citylens.git
 cd Citylens
 cp .env.example .env
-pnpm install
+pnpm install --frozen-lockfile
+pnpm dev
 ```
 
-Set the server-side key:
+Set the server-side credential in `.env`:
 
 ```text
-GEMINI_API_KEY=your_key_here
+GEMINI_API_KEY=...
 ```
 
 Never commit a real credential.
-
-Start the app:
-
-```bash
-pnpm dev
-```
 
 ## Verification
 
@@ -92,32 +84,27 @@ pnpm test
 pnpm build
 ```
 
-The API security-sensitive path is `server.ts` and the associated validation modules.
+Review `server.ts`, `server-validation.ts`, and the provider integration together for public API changes.
 
-## Security
+## Security model
 
-Keep provider credentials server-side, enforce request-size/MIME controls, retain rate limiting before high-scale public deployment, and independently validate model-generated coordinates/POI data.
+The browser must never receive provider or database credentials. Treat model output, user uploads, and external geospatial data as untrusted; validate and bound them before expensive or security-sensitive processing.
 
-The repository's CI uses immutable GitHub Action SHAs and least-privilege workflow permissions.
+See [SECURITY.md](SECURITY.md).
 
-## Evidence and reproducibility
+## Evidence policy
 
-Deterministic validation proves application behavior, not real-world landmark-recognition accuracy. Any published recognition, reliability, latency, or coverage result should state provider/model, dataset, sample count, method, environment, and producing commit.
+Deterministic tests demonstrate software behavior, not real-world landmark-recognition accuracy. Publish recognition, reliability, latency, or coverage claims only with provider/model, dataset, sample count, methodology, environment, and producing commit.
+
+## Documentation
+
+- [Security](SECURITY.md)
+- [Verification](docs/verification.md)
+- [Evidence policy](docs/evidence-policy.md)
 
 ## Roadmap
 
-- Expand server/API integration coverage.
-- Runtime schema validation for model responses.
-- Versioned landmark evaluation dataset.
-- Provider abstraction and geospatial result verification.
-
-## Review path
-
-Start with [SECURITY.md](SECURITY.md) and [verification](docs/verification.md), then inspect `server.ts`, validation modules, and provider integration before changing public API behavior.
-
-## Maintenance standard
-
-Keep secrets off the client, keep request/rate controls active, validate external data, and preserve reproducibility of test fixtures.
+Broader API integration coverage, runtime schema validation, versioned landmark evaluation datasets, and provider/geospatial verification.
 
 ## License
 
