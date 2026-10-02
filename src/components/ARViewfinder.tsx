@@ -119,6 +119,7 @@ export const ARViewfinder: React.FC<ARViewfinderProps> = ({
   onFilterChange,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const parallaxRef = useRef<HTMLDivElement | null>(null);
   const [internalFilter, setInternalFilter] = useState<ARFilterMode>('normal');
   const [filterIntensity, setFilterIntensity] = useState<number>(85); // 40 - 100%
   const [isComparingOriginal, setIsComparingOriginal] = useState(false);
@@ -127,7 +128,6 @@ export const ARViewfinder: React.FC<ARViewfinderProps> = ({
   const [showHUD, setShowHUD] = useState(true);
   const [showLaser, setShowLaser] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [isVRViewActive, setIsVRViewActive] = useState<boolean>(false);
 
   const activeFilterMode = externalFilter || internalFilter;
@@ -139,17 +139,21 @@ export const ARViewfinder: React.FC<ARViewfinderProps> = ({
     }
   };
 
-  // 3D Parallax Tilt calculation on mouse move
+  // 3D Parallax Tilt calculation on mouse move (Optimized with direct DOM manipulation to prevent re-renders)
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !parallaxRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setTilt({ x: x * 8, y: -y * 8 });
+
+    // Direct DOM manipulation bypasses React state for high-frequency events
+    parallaxRef.current.style.transform = `rotateY(${x * 8}deg) rotateX(${-y * 8}deg) scale(1.02)`;
   };
 
   const handleMouseLeave = () => {
-    setTilt({ x: 0, y: 0 });
+    if (parallaxRef.current) {
+      parallaxRef.current.style.transform = `rotateY(0deg) rotateX(0deg) scale(1.02)`;
+    }
   };
 
   const toggleFullscreen = () => {
@@ -416,9 +420,10 @@ export const ARViewfinder: React.FC<ARViewfinderProps> = ({
       >
         {/* The Base Photo with 3D Parallax & Artistic CSS Filters */}
         <div
+          ref={parallaxRef}
           className="relative w-full h-full transition-transform duration-150 ease-out"
           style={{
-            transform: `rotateY(${tilt.x}deg) rotateX(${tilt.y}deg) scale(1.02)`,
+            transform: `rotateY(0deg) rotateX(0deg) scale(1.02)`,
           }}
         >
           <img
