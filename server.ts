@@ -52,6 +52,37 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
+// Security enhancement: Basic in-memory rate limiting to protect against DoS attacks on /api endpoints
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+app.use('/api', (req, res, next) => {
+  const ip = req.ip || req.socket?.remoteAddress || 'unknown';
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000; // 15 minutes window
+  const maxRequests = 100; // limit each IP to 100 requests per windowMs
+
+  let record = rateLimitMap.get(ip);
+  if (!record || now > record.resetTime) {
+    record = { count: 1, resetTime: now + windowMs };
+  } else {
+    record.count++;
+  }
+  rateLimitMap.set(ip, record);
+
+  // Periodic cleanup of rateLimitMap to prevent memory leaks over time
+  if (rateLimitMap.size > 10000) {
+    for (const [key, val] of rateLimitMap.entries()) {
+      if (now > val.resetTime) {
+        rateLimitMap.delete(key);
+      }
+    }
+  }
+
+  if (record.count > maxRequests) {
+    return res.status(429).json({ error: 'Too many requests, please try again later.' });
+  }
+  next();
+});
+
 // Allow payloads up to 25MB only for high-resolution city photos on the recognize endpoint
 app.use('/api/recognize', express.json({ limit: '25mb' }));
 // Security enhancement: Use a strict 100kb limit for all other routes to prevent payload-based DoS attacks
