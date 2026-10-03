@@ -10,6 +10,6 @@
 **Learning:** Re-computing and re-mapping arrays to generate complex 3D CSS structures (like VR panaroma meshes or compass dials) inside the render loop causes significant layout thrashing when the parent component updates at 60FPS (e.g., via device gyroscope `pitch`/`yaw`). Even if the data doesn't change, React rebuilds the deep div tree inline.
 **Action:** Extract fully static elements (like compass degree tapes) outside the component completely. For dynamic but low-frequency updating 3D meshes (like the cylinder projection that only depends on `imageSrc` and constant panels), wrap them in `useMemo` so the 3D element tree is only built once, saving immense diffing costs during high-FPS camera rotations.
 
-## 2024-05-18 - [App Header Re-rendering]
-**Learning:** Top-level components like Header receive many props and re-render every time the main App state changes, even when their props haven't changed.
-**Action:** Always wrap top-level layout components like Header in React.memo and use useCallback for the functions passed to them to prevent unnecessary re-renders cascading from parent state updates.
+## 2025-03-01 - Optimization of high-frequency mouse events in ARViewfinder
+**Learning:** High-frequency input events like `mousemove` triggering React state updates (`setState`) in complex components cause significant layout thrashing and performance bottlenecks, as the entire component tree re-renders on every pixel move.
+**Action:** Replaced the `tilt` state with a `useRef` pointing to the parallax container, and updated the DOM directly via `parallaxRef.current.style.transform` inside the event handler. This bypasses the React render cycle completely for hover effects, ensuring smooth 60fps performance without re-rendering the heavy AR component.
