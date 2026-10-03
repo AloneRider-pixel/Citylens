@@ -1,39 +1,37 @@
-# CityLens
+# CityLens — AI City & Landmark Explorer
 
 [![CI](https://github.com/AloneRider-pixel/Citylens/actions/workflows/ci.yml/badge.svg)](https://github.com/AloneRider-pixel/Citylens/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/AloneRider-pixel/Citylens/actions/workflows/codeql.yml/badge.svg)](https://github.com/AloneRider-pixel/Citylens/actions/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**AI-powered city and landmark exploration web application.**
+AI-powered city and landmark exploration web app built around server-side vision inference, validated responses, maps, and a progressive web app experience.
 
-CityLens accepts a city/landmark photo, sends it through a server-side Gemini vision integration, normalizes the result into structured data, and presents the recognition result together with nearby points of interest on an interactive map.
+## Product flow
 
-> **Portfolio focus:** React + TypeScript + Node.js + Gemini vision + geospatial UI + PWA engineering.
-
-## Architecture
-
-```mermaid
-graph LR
-    PHOTO[User Photo]
-    UI[React + TypeScript]
-    API[Express API]
-    GEMINI[Gemini Vision]
-    RESULT[Structured Landmark Result]
-    MAP[Interactive Map + Nearby POIs]
-
-    PHOTO --> UI --> API --> GEMINI --> RESULT --> MAP
+```text
+Photo
+  ↓
+React + TypeScript
+  ↓
+Express API
+  ↓
+Gemini Vision
+  ↓
+Validated landmark result
+  ↓
+Map / nearby points of interest
 ```
 
 ## Engineering highlights
 
-- Gemini credentials stay on the server rather than in the browser bundle.
-- API responses are normalized before reaching the UI.
-- Image request bodies are bounded to avoid unbounded payload growth.
-- Security headers are applied at the server boundary.
-- Recognition and map functionality are separated so the geospatial experience is not coupled to model execution.
-- CI performs dependency installation, type/lint validation, and a production build.
-- Dependabot and CodeQL provide dependency and static-analysis automation.
-- PWA service-worker support enables an installable web experience.
+- Gemini credentials stay server-side.
+- Request size and content controls protect expensive provider calls.
+- API security headers and rate limiting protect the public boundary.
+- Model responses are normalized before reaching the UI.
+- PWA service-worker support provides an installable web experience.
+- CI covers install, lint, type checking, tests, build, CodeQL, dependency review, Scorecard, and synthetic validation.
 
-## Technology stack
+## Stack
 
 | Layer | Technology |
 |---|---|
@@ -42,84 +40,72 @@ graph LR
 | AI | Google Gemini SDK |
 | Maps | Leaflet |
 | Styling | Tailwind CSS |
-| UX | Motion, Lucide React |
-| Platform | PWA service worker |
-| Quality | GitHub Actions, TypeScript checks |
+| Platform | PWA |
+| Security/CI | GitHub Actions, CodeQL, Dependabot, Scorecard |
 
-## Repository structure
+## Repository map
 
 ```text
-Citylens/
-├── src/
-│   ├── components/             # UI components
-│   ├── context/                # Application state
-│   ├── data/                   # Local application data
-│   ├── services/               # External/API services
-│   ├── App.tsx
-│   ├── main.tsx
-│   ├── types.ts
-│   └── serviceWorkerRegistration.ts
-├── server.ts                   # Express + Gemini API boundary
-├── vite.config.ts
-├── package.json
-└── .github/workflows/ci.yml
+src/components/
+src/services/
+server.ts
+image-validation.ts
+server-validation.ts
+public/
+package.json
+pnpm-lock.yaml
+.github/workflows/
 ```
 
-## Local development
-
-### Setup
+## Quick start
 
 ```bash
 git clone https://github.com/AloneRider-pixel/Citylens.git
 cd Citylens
 cp .env.example .env
-pnpm install
-```
-
-Set the server-side API key in `.env`:
-
-```text
-GEMINI_API_KEY=your_key_here
-```
-
-Never commit a real API credential.
-
-### Run
-
-```bash
+pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-### Quality checks
+Set the server-side credential in `.env`:
+
+```text
+GEMINI_API_KEY=...
+```
+
+Never commit a real credential.
+
+## Verification
 
 ```bash
+pnpm install --frozen-lockfile
 pnpm lint
+pnpm test
 pnpm build
 ```
 
-## Security considerations
+Review `server.ts`, `server-validation.ts`, and the provider integration together for public API changes.
 
-- Keep `GEMINI_API_KEY` server-side.
-- Validate uploaded image MIME types and payload size before public deployment.
-- Add authentication and rate limiting before exposing the recognition endpoint at scale.
-- Treat model-generated coordinates and nearby-POI information as unverified unless independently validated.
+## Security model
+
+The browser must never receive provider or database credentials. Treat model output, user uploads, and external geospatial data as untrusted; validate and bound them before expensive or security-sensitive processing.
+
+See [SECURITY.md](SECURITY.md).
+
+## Evidence policy
+
+Deterministic tests demonstrate software behavior, not real-world landmark-recognition accuracy. Publish recognition, reliability, latency, or coverage claims only with provider/model, dataset, sample count, methodology, environment, and producing commit.
+
+## Documentation
+
+- [Security](SECURITY.md)
+- [Verification](docs/verification.md)
+- [Evidence policy](docs/evidence-policy.md)
 
 ## Roadmap
 
-- Unit/integration tests for the recognition API boundary.
-- Runtime schema validation for model/API responses.
-- API rate limiting and structured request logging.
-- Versioned evaluation set for landmark-recognition quality.
-- Provider abstraction for additional vision models.
-- Geospatial result verification and caching.
+Broader API integration coverage, runtime schema validation, versioned landmark evaluation datasets, and provider/geospatial verification.
 
 ## License
 
 MIT
-
-
-## Evidence and reproducibility
-
-CityLens distinguishes application-level validation from real-world recognition quality. The repository does not treat deterministic fixtures as production accuracy evidence. Any measured recognition, latency, coverage, or reliability result should include the dataset, model/provider, sample count, method, environment, and producing commit.
-
-See [Evidence Policy](docs/evidence-policy.md).

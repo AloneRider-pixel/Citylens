@@ -15,11 +15,71 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 3000;
 
+app.disable('x-powered-by');
+
 // Security enhancement: Add essential security headers
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  next();
+});
+
+// Security enhancement: Implement basic IP-based rate limiting to prevent automated DoS and token exhaustion on expensive AI endpoints
+// CRITICAL SECURITY FIX: Place rate limiter BEFORE express.json() payload parsers.
+// Otherwise, an attacker can bypass CPU/memory protections by sending 25MB payloads,
+// causing Node to buffer and parse massive JSON objects before the rate limit is checked.
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+app.use('/api', (req, res, next) => {
+  const ip = req.ip || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  const windowMs = 60 * 1000; // 1 minute window
+
+  let record = rateLimitMap.get(ip);
+  if (!record || now > record.resetTime) {
+    record = { count: 0, resetTime: now + windowMs };
+  }
+
+  record.count++;
+  rateLimitMap.set(ip, record);
+
+  // Allow 50 requests per minute per IP. Clean up old entries periodically.
+  if (record.count > 50) {
+    return res.status(429).json({ error: 'Too many requests, please try again later.' });
+  }
+
+  next();
+});
+
+// Security enhancement: Basic in-memory rate limiting to protect against DoS attacks on /api endpoints
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+app.use('/api', (req, res, next) => {
+  const ip = req.ip || req.socket?.remoteAddress || 'unknown';
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000; // 15 minutes window
+  const maxRequests = 100; // limit each IP to 100 requests per windowMs
+
+  let record = rateLimitMap.get(ip);
+  if (!record || now > record.resetTime) {
+    record = { count: 1, resetTime: now + windowMs };
+  } else {
+    record.count++;
+  }
+  rateLimitMap.set(ip, record);
+
+  // Periodic cleanup of rateLimitMap to prevent memory leaks over time
+  if (rateLimitMap.size > 10000) {
+    for (const [key, val] of rateLimitMap.entries()) {
+      if (now > val.resetTime) {
+        rateLimitMap.delete(key);
+      }
+    }
+  }
+
+  if (record.count > maxRequests) {
+    return res.status(429).json({ error: 'Too many requests, please try again later.' });
+  }
   next();
 });
 
@@ -27,6 +87,16 @@ app.use((req, res, next) => {
 app.use('/api/recognize', express.json({ limit: '25mb' }));
 // Security enhancement: Use a strict 100kb limit for all other routes to prevent payload-based DoS attacks
 app.use(express.json({ limit: '100kb' }));
+
+// Periodic cleanup to prevent memory leaks and avoid blocking the event loop on requests
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of rateLimitMap.entries()) {
+    if (now > value.resetTime) {
+      rateLimitMap.delete(key);
+    }
+  }
+}, 60 * 1000); // Run every minute
 
 // Initialize GoogleGenAI SDK with required user-agent
 const ai = new GoogleGenAI({
