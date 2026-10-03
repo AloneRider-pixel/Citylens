@@ -6,6 +6,6 @@
 **Learning:** Found multiple instances where critical interactive elements (like the main camera and upload cards in PhotoUploader) were built as `div` elements relying solely on `onClick`, completely blocking keyboard users (Tab navigation, Enter/Space activation) and hiding their interactive nature from screen readers.
 **Action:** Always verify that any interactive element not using a semantic `<button>` or `<a>` tag receives `role="button"`, `tabIndex={0}`, `onKeyDown` support, descriptive `aria-label` (if icon-only or visually complex), and explicit `focus-visible` styling for keyboard focus indication.
 
-## 2026-09-30 - Missing ARIA Labels on Icon-only Utilities
-**Learning:** Found an instance in RealtimeWeatherWidget where a utility action button (refresh) relied solely on the `title` attribute without providing an accessible name, making it inaccessible to screen reader users relying on interactive element lists rather than hover states.
-**Action:** Always provide an explicit `aria-label` for all icon-only utility buttons, rather than relying exclusively on `title` attributes, to ensure robust screen reader compatibility.
+## 2024-10-01 - Avoid Overriding Text with aria-label
+**Learning:** Adding `aria-label` to buttons that contain visible text and dynamic content (e.g., a notification badge) causes screen readers to completely ignore the inner text. This is a severe accessibility regression rather than an improvement.
+**Action:** Only apply `aria-label` to genuinely icon-only interactive elements. For elements with visible text, rely on their semantic content and avoid redundant or overriding labels unless providing necessary supplementary context (e.g., `aria-describedby`).
