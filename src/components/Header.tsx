@@ -31,7 +31,7 @@ const VOICES = [
   { id: 'Zephyr', name: 'Zephyr', label: 'Serene Guide' },
 ];
 
-export const Header: React.FC<HeaderProps> = React.memo(({
+export const Header: React.FC<HeaderProps> = ({
   selectedVoice,
   onSelectVoice,
   savedToursCount,
@@ -158,4 +158,4 @@ export const Header: React.FC<HeaderProps> = React.memo(({
       </div>
     </header>
   );
-});
+};

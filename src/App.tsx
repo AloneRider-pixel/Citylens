@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { AlertTriangle, RefreshCw, Sparkles, MapPin, WifiOff, HardDrive } from 'lucide-react';
 import { Header } from './components/Header';
@@ -296,13 +296,7 @@ export default function App() {
     }
   };
 
-  const handleOpenPassport = useCallback(() => setIsPassportOpen(true), []);
-  const handleOpenShare = useCallback(() => {
-    setTourToShare(null);
-    setIsShareModalOpen(true);
-  }, []);
-
-  const handleResetToNewScan = useCallback(() => {
+  const handleResetToNewScan = () => {
     setActiveImage(null);
     setRecognition(null);
     setHistory(null);
@@ -310,7 +304,7 @@ export default function App() {
     setActivePointId(null);
     setProcessingStep('idle');
     setErrorMessage(null);
-  }, []);
+  };
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
@@ -319,11 +313,14 @@ export default function App() {
         selectedVoice={selectedVoice}
         onSelectVoice={setSelectedVoice}
         savedToursCount={savedTours.length}
-        onOpenPassport={handleOpenPassport}
+        onOpenPassport={() => setIsPassportOpen(true)}
         onNewScan={handleResetToNewScan}
         hasActiveLandmark={Boolean(activeImage && processingStep === 'completed')}
         isOffline={isOffline}
-        onOpenShare={handleOpenShare}
+        onOpenShare={() => {
+          setTourToShare(null);
+          setIsShareModalOpen(true);
+        }}
       />
 
       {/* Offline Status Alert Banner */}
