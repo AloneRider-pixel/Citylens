@@ -248,6 +248,7 @@ export const RealtimeWeatherWidget: React.FC<RealtimeWeatherWidgetProps> = ({ re
             disabled={isRefreshing}
             className="p-1.5 bg-white/90 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shadow-2xs transition-colors cursor-pointer"
             title="Refresh live weather"
+            aria-label="Refresh live weather"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-600 dark:text-amber-400' : ''}`} />
           </button>
