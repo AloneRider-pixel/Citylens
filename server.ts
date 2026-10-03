@@ -32,29 +32,6 @@ app.use((req, res, next) => {
 // causing Node to buffer and parse massive JSON objects before the rate limit is checked.
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 app.use('/api', (req, res, next) => {
-  const ip = req.ip || req.socket.remoteAddress || 'unknown';
-  const now = Date.now();
-  const windowMs = 60 * 1000; // 1 minute window
-
-  let record = rateLimitMap.get(ip);
-  if (!record || now > record.resetTime) {
-    record = { count: 0, resetTime: now + windowMs };
-  }
-
-  record.count++;
-  rateLimitMap.set(ip, record);
-
-  // Allow 50 requests per minute per IP. Clean up old entries periodically.
-  if (record.count > 50) {
-    return res.status(429).json({ error: 'Too many requests, please try again later.' });
-  }
-
-  next();
-});
-
-// Security enhancement: Basic in-memory rate limiting to protect against DoS attacks on /api endpoints
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-app.use('/api', (req, res, next) => {
   const ip = req.ip || req.socket?.remoteAddress || 'unknown';
   const now = Date.now();
   const windowMs = 15 * 60 * 1000; // 15 minutes window
