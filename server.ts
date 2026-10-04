@@ -35,30 +35,7 @@ app.use('/api', (req, res, next) => {
   const ip = req.ip || req.socket.remoteAddress || 'unknown';
   const now = Date.now();
   const windowMs = 60 * 1000; // 1 minute window
-
-  let record = rateLimitMap.get(ip);
-  if (!record || now > record.resetTime) {
-    record = { count: 0, resetTime: now + windowMs };
-  }
-
-  record.count++;
-  rateLimitMap.set(ip, record);
-
-  // Allow 50 requests per minute per IP. Clean up old entries periodically.
-  if (record.count > 50) {
-    return res.status(429).json({ error: 'Too many requests, please try again later.' });
-  }
-
-  next();
-});
-
-// Security enhancement: Basic in-memory rate limiting to protect against DoS attacks on /api endpoints
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-app.use('/api', (req, res, next) => {
-  const ip = req.ip || req.socket?.remoteAddress || 'unknown';
-  const now = Date.now();
-  const windowMs = 15 * 60 * 1000; // 15 minutes window
-  const maxRequests = 100; // limit each IP to 100 requests per windowMs
+  const maxRequests = 50;
 
   let record = rateLimitMap.get(ip);
   if (!record || now > record.resetTime) {
@@ -77,9 +54,11 @@ app.use('/api', (req, res, next) => {
     }
   }
 
+  // Allow 50 requests per minute per IP.
   if (record.count > maxRequests) {
     return res.status(429).json({ error: 'Too many requests, please try again later.' });
   }
+
   next();
 });
 
