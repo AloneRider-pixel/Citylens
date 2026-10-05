@@ -13,3 +13,7 @@
 ## 2025-03-01 - Optimization of high-frequency mouse events in ARViewfinder
 **Learning:** High-frequency input events like `mousemove` triggering React state updates (`setState`) in complex components cause significant layout thrashing and performance bottlenecks, as the entire component tree re-renders on every pixel move.
 **Action:** Replaced the `tilt` state with a `useRef` pointing to the parallax container, and updated the DOM directly via `parallaxRef.current.style.transform` inside the event handler. This bypasses the React render cycle completely for hover effects, ensuring smooth 60fps performance without re-rendering the heavy AR component.
+
+## 2026-10-05 - Optimization of static data in high-frequency renders
+**Learning:** Defining static arrays (like the cardinals array in VRPanoramaViewer) inside a function called during every render (which runs at 60FPS) causes unnecessary memory allocation and garbage collection, leading to performance drops.
+**Action:** Moved the `cardinals` array outside the `getCompassHeadingText` function to the module level as `CARDINALS` to instantiate it only once.
