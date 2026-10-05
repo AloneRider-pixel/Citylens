@@ -1400,7 +1400,7 @@ packages:
       yaml:
         optional: true
 
-  snapshots:
+snapshots:
 
   '@esbuild/aix-ppc64@0.28.2':
     optional: true
