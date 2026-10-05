@@ -17,6 +17,9 @@ const PORT = 3000;
 
 app.disable('x-powered-by');
 
+// Security enhancement: Trust proxy so req.ip correctly identifies clients behind load balancers
+app.set('trust proxy', 1);
+
 // Security enhancement: Add essential security headers
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -37,6 +40,14 @@ app.use('/api', (req, res, next) => {
   const windowMs = 60 * 1000; // 1 minute window
 
   let record = rateLimitMap.get(ip);
+  if (!record) {
+    // Security enhancement: Prevent OOM DoS from IP spoofing via pseudo-LRU eviction.
+    // Maps iterate in insertion order, so the first key is the oldest.
+    if (rateLimitMap.size >= 10000) {
+      rateLimitMap.delete(rateLimitMap.keys().next().value!);
+    }
+  }
+
   if (!record || now > record.resetTime) {
     record = { count: 0, resetTime: now + windowMs };
   }
