@@ -15,6 +15,11 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 3000;
 
+// Security enhancement: Trust first proxy to ensure rate limiter gets correct IP behind load balancers
+// Only enable in production to prevent IP spoofing during direct exposure testing
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
 app.disable('x-powered-by');
 
 // Security enhancement: Add essential security headers
@@ -42,6 +47,17 @@ app.use('/api', (req, res, next) => {
   }
 
   record.count++;
+
+  // Security enhancement: Prevent OOM DoS by bounding the rate limit map size
+  if (rateLimitMap.size >= 10000 && !rateLimitMap.has(ip)) {
+    // Evict the oldest entry (first item in Map iteration) rather than clearing the whole map
+    // to prevent attackers from bypassing limits by flooding the cache.
+    const firstKey = rateLimitMap.keys().next().value;
+    if (firstKey) {
+      rateLimitMap.delete(firstKey);
+    }
+  }
+
   rateLimitMap.set(ip, record);
 
   // Allow 50 requests per minute per IP. Clean up old entries periodically.
