@@ -13,3 +13,6 @@
 ## 2025-03-01 - Optimization of high-frequency mouse events in ARViewfinder
 **Learning:** High-frequency input events like `mousemove` triggering React state updates (`setState`) in complex components cause significant layout thrashing and performance bottlenecks, as the entire component tree re-renders on every pixel move.
 **Action:** Replaced the `tilt` state with a `useRef` pointing to the parallax container, and updated the DOM directly via `parallaxRef.current.style.transform` inside the event handler. This bypasses the React render cycle completely for hover effects, ensuring smooth 60fps performance without re-rendering the heavy AR component.
+## 2023-11-10 - Optimization of high-frequency geometric matching in VR orientation
+**Learning:** Performing O(n) array instantiations and geometric searches (e.g. iterating over coordinate limits using `.find()`) inside functions called during `deviceorientation` or `mousemove` causes extreme garbage collection overhead and main-thread blocking, bottlenecking rendering.
+**Action:** Extract static arrays (like compass cardinals) outside the component completely to prevent per-frame memory allocation. Replace linear O(n) geometric boundary searches with direct O(1) mathematical lookups (e.g., using integer division/modulo on angles) to ensure optimal sub-millisecond execution.
