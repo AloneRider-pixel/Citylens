@@ -104,7 +104,6 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
         <div
           role="button"
           tabIndex={0}
-          aria-label="Snap photo with camera"
           onClick={onOpenCamera}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -139,7 +138,6 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
         <div
           role="button"
           tabIndex={0}
-          aria-label="Upload city photo from device"
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -172,7 +170,7 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
               <Upload className="w-6 h-6 text-slate-800 dark:text-amber-400" />
             </div>
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">
-              Upload City Photo
+              {isDragging ? 'Drop Photo Here!' : 'Upload City Photo'}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
               Drop a photo from your camera roll, vacation album, or screenshots (JPG, PNG, WebP).
@@ -203,7 +201,7 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
             <button
               key={landmark.id}
               type="button"
-              aria-label={`Test recognition with preset image of ${landmark.name}`}
+              title={`Test recognition with preset image of ${landmark.name}`}
               onClick={() => onPhotoSelected(landmark.thumbnail, landmark)}
               className="group text-left bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-slate-400 dark:hover:border-amber-500/60 hover:shadow-md focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-500 transition-all cursor-pointer flex flex-col"
             >
