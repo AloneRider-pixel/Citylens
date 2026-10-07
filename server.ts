@@ -15,6 +15,10 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 3000;
 
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 app.disable('x-powered-by');
 
 // Security enhancement: Add essential security headers
@@ -31,6 +35,7 @@ app.use((req, res, next) => {
 // Otherwise, an attacker can bypass CPU/memory protections by sending 25MB payloads,
 // causing Node to buffer and parse massive JSON objects before the rate limit is checked.
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const MAX_MAP_SIZE = 10000;
 app.use('/api', (req, res, next) => {
   const ip = req.ip || req.socket.remoteAddress || 'unknown';
   const now = Date.now();
@@ -42,6 +47,14 @@ app.use('/api', (req, res, next) => {
   }
 
   record.count++;
+
+  if (!rateLimitMap.has(ip) && rateLimitMap.size >= MAX_MAP_SIZE) {
+    const oldestKey = rateLimitMap.keys().next().value;
+    if (oldestKey !== undefined) {
+      rateLimitMap.delete(oldestKey);
+    }
+  }
+
   rateLimitMap.set(ip, record);
 
   // Allow 50 requests per minute per IP. Clean up old entries periodically.
