@@ -9,3 +9,7 @@
 ## 2024-10-01 - Avoid Overriding Text with aria-label
 **Learning:** Adding `aria-label` to buttons that contain visible text and dynamic content (e.g., a notification badge) causes screen readers to completely ignore the inner text. This is a severe accessibility regression rather than an improvement.
 **Action:** Only apply `aria-label` to genuinely icon-only interactive elements. For elements with visible text, rely on their semantic content and avoid redundant or overriding labels unless providing necessary supplementary context (e.g., `aria-describedby`).
+
+## 2024-10-08 - Dynamic Textual Feedback for Drag and Drop
+**Learning:** Providing visual state changes (like border/background color) is good, but combining it with dynamic textual feedback (e.g., changing "Upload Photo" to "Drop Photo Here!") makes the drag-and-drop interaction significantly more intuitive and explicit for users.
+**Action:** Always include dynamic textual instructions alongside visual state changes during drag-and-drop or similar continuous interaction flows.
