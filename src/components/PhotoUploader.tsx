@@ -172,14 +172,16 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
               <Upload className="w-6 h-6 text-slate-800 dark:text-amber-400" />
             </div>
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">
-              Upload City Photo
+              {isDragging ? 'Drop Photo Here!' : 'Upload City Photo'}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
-              Drop a photo from your camera roll, vacation album, or screenshots (JPG, PNG, WebP).
+              {isDragging
+                ? 'Release to upload your image instantly'
+                : 'Drop a photo from your camera roll, vacation album, or screenshots (JPG, PNG, WebP).'}
             </p>
           </div>
           <div className="flex items-center text-xs font-semibold text-slate-700 dark:text-amber-400">
-            <span>Choose Image File</span>
+            <span>{isDragging ? 'Ready to Upload' : 'Choose Image File'}</span>
             <ArrowRight className="w-4 h-4 ml-1" />
           </div>
         </div>
