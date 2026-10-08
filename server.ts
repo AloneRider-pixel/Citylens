@@ -17,6 +17,10 @@ const PORT = 3000;
 
 app.disable('x-powered-by');
 
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // Security enhancement: Add essential security headers
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -31,10 +35,17 @@ app.use((req, res, next) => {
 // Otherwise, an attacker can bypass CPU/memory protections by sending 25MB payloads,
 // causing Node to buffer and parse massive JSON objects before the rate limit is checked.
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const MAX_RATE_LIMIT_MAP_SIZE = 10000;
+
 app.use('/api', (req, res, next) => {
   const ip = req.ip || req.socket.remoteAddress || 'unknown';
   const now = Date.now();
   const windowMs = 60 * 1000; // 1 minute window
+
+  if (rateLimitMap.size >= MAX_RATE_LIMIT_MAP_SIZE && !rateLimitMap.has(ip)) {
+    const oldestKey = rateLimitMap.keys().next().value;
+    if (oldestKey) rateLimitMap.delete(oldestKey);
+  }
 
   let record = rateLimitMap.get(ip);
   if (!record || now > record.resetTime) {
