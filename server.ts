@@ -30,7 +30,13 @@ app.use((req, res, next) => {
 // CRITICAL SECURITY FIX: Place rate limiter BEFORE express.json() payload parsers.
 // Otherwise, an attacker can bypass CPU/memory protections by sending 25MB payloads,
 // causing Node to buffer and parse massive JSON objects before the rate limit is checked.
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const MAX_RATE_LIMIT_ENTRIES = 10000;
+
 app.use('/api', (req, res, next) => {
   const ip = req.ip || req.socket.remoteAddress || 'unknown';
   const now = Date.now();
@@ -42,7 +48,19 @@ app.use('/api', (req, res, next) => {
   }
 
   record.count++;
+
+  // Re-insert to update insertion order for LRU-like behavior
+  rateLimitMap.delete(ip);
   rateLimitMap.set(ip, record);
+
+  // Strictly bound map size to prevent OOM DoS.
+  // We evict the oldest entry (first inserted) using iterator instead of clearing all to prevent Global Flush.
+  if (rateLimitMap.size > MAX_RATE_LIMIT_ENTRIES) {
+    const oldestKey = rateLimitMap.keys().next().value;
+    if (oldestKey !== undefined) {
+      rateLimitMap.delete(oldestKey);
+    }
+  }
 
   // Allow 50 requests per minute per IP. Clean up old entries periodically.
   if (record.count > 50) {
