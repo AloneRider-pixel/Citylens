@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {  useState, useEffect , useMemo } from 'react';
 import confetti from 'canvas-confetti';
 import {
   Award,
@@ -90,17 +90,21 @@ export const LandmarkChallengeQuiz: React.FC<LandmarkChallengeQuizProps> = React
     setUserAnswers(updatedAnswers);
   };
 
+  const finalScore = useMemo(() => {
+    return userAnswers.reduce((score: number, ans, idx) => {
+      return (score || 0) + (ans === questions[idx]?.correctAnswerIndex ? 1 : 0);
+    }, 0);
+  }, [userAnswers, questions]);
+
   const handleNextQuestion = () => {
+
     if (currentIndex < questions.length - 1) {
       setCurrentIndex((prev) => prev + 1);
       setSelectedOption(null);
       setIsAnswerSubmitted(false);
     } else {
       setIsCompleted(true);
-      // Calculate final score
-      const finalScore = userAnswers.reduce((score: number, ans, idx) => {
-        return (score || 0) + (ans === questions[idx]?.correctAnswerIndex ? 1 : 0);
-      }, 0);
+      // Calculate final score is now memoized
 
       // Trigger celebratory confetti for perfect score or 2+
       if (finalScore >= 2) {
@@ -114,11 +118,7 @@ export const LandmarkChallengeQuiz: React.FC<LandmarkChallengeQuizProps> = React
     }
   };
 
-  const calculateScore = () => {
-    return userAnswers.reduce((score: number, ans, idx) => {
-      return (score || 0) + (ans === questions[idx]?.correctAnswerIndex ? 1 : 0);
-    }, 0);
-  };
+
 
   const getRankBadge = (score: number) => {
     if (score === 3) {
@@ -230,7 +230,7 @@ export const LandmarkChallengeQuiz: React.FC<LandmarkChallengeQuizProps> = React
           /* Completed Score Screen */
           <div className="py-6 max-w-2xl mx-auto space-y-6">
             {(() => {
-              const score = calculateScore();
+              const score = finalScore;
               const rank = getRankBadge(score);
               const RankIcon = rank.icon;
 
