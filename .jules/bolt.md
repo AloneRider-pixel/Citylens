@@ -13,3 +13,7 @@
 ## 2025-03-01 - Optimization of high-frequency mouse events in ARViewfinder
 **Learning:** High-frequency input events like `mousemove` triggering React state updates (`setState`) in complex components cause significant layout thrashing and performance bottlenecks, as the entire component tree re-renders on every pixel move.
 **Action:** Replaced the `tilt` state with a `useRef` pointing to the parallax container, and updated the DOM directly via `parallaxRef.current.style.transform` inside the event handler. This bypasses the React render cycle completely for hover effects, ensuring smooth 60fps performance without re-rendering the heavy AR component.
+
+## 2025-03-01 - Optimization of derived state in LandmarkChallengeQuiz
+**Learning:** Performing array reduction (`.reduce`) inside a render cycle or duplicating it across functions causes redundant computations on every state update or interaction.
+**Action:** Extracted the quiz score reduction into a `useMemo` hook to ensure it only recalculates when `userAnswers` or `questions` change, replacing both the `calculateScore` function and the local `finalScore` calculation.
