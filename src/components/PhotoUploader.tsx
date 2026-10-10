@@ -168,19 +168,27 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
             }}
           />
           <div>
-            <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-amber-400 flex items-center justify-center mb-4">
-              <Upload className="w-6 h-6 text-slate-800 dark:text-amber-400" />
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors ${
+              isDragging ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-amber-400'
+            }`}>
+              <Upload className={`w-6 h-6 ${isDragging ? 'text-amber-600 dark:text-amber-300' : 'text-slate-800 dark:text-amber-400'}`} />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">
-              Upload City Photo
+            <h3 className={`text-lg font-bold mb-1 transition-colors ${
+              isDragging ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-white'
+            }`}>
+              {isDragging ? 'Drop Photo Here!' : 'Upload City Photo'}
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
-              Drop a photo from your camera roll, vacation album, or screenshots (JPG, PNG, WebP).
+            <p className={`text-xs leading-relaxed mb-4 transition-colors ${
+              isDragging ? 'text-amber-700/70 dark:text-amber-300/70' : 'text-slate-500 dark:text-slate-400'
+            }`}>
+              {isDragging ? 'Release to instantly scan and recognize your city landmark.' : 'Drop a photo from your camera roll, vacation album, or screenshots (JPG, PNG, WebP).'}
             </p>
           </div>
-          <div className="flex items-center text-xs font-semibold text-slate-700 dark:text-amber-400">
-            <span>Choose Image File</span>
-            <ArrowRight className="w-4 h-4 ml-1" />
+          <div className={`flex items-center text-xs font-semibold transition-colors ${
+            isDragging ? 'text-amber-600 dark:text-amber-400' : 'text-slate-700 dark:text-amber-400'
+          }`}>
+            <span>{isDragging ? 'Ready to process' : 'Choose Image File'}</span>
+            <ArrowRight className={`w-4 h-4 ml-1 transition-transform ${isDragging ? 'translate-x-1' : ''}`} />
           </div>
         </div>
       </div>
