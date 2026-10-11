@@ -17,6 +17,12 @@ const PORT = 3000;
 
 app.disable('x-powered-by');
 
+// Security enhancement: Trust proxy in production for accurate IP-based rate limiting behind reverse proxies.
+// Wrapped in a production check to prevent IP spoofing attacks via X-Forwarded-For headers during direct local exposure.
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // Security enhancement: Add essential security headers
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -31,6 +37,8 @@ app.use((req, res, next) => {
 // Otherwise, an attacker can bypass CPU/memory protections by sending 25MB payloads,
 // causing Node to buffer and parse massive JSON objects before the rate limit is checked.
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const MAX_RATE_LIMIT_ENTRIES = 10000;
+
 app.use('/api', (req, res, next) => {
   const ip = req.ip || req.socket.remoteAddress || 'unknown';
   const now = Date.now();
@@ -38,13 +46,25 @@ app.use('/api', (req, res, next) => {
 
   let record = rateLimitMap.get(ip);
   if (!record || now > record.resetTime) {
+    // Security enhancement: Bound the map size to prevent Out-Of-Memory (OOM) DoS attacks.
+    // If the map is full, evict the oldest entry instead of clearing the map entirely,
+    // which would create a "Global Flush" vulnerability.
+    if (rateLimitMap.size >= MAX_RATE_LIMIT_ENTRIES && !rateLimitMap.has(ip)) {
+      const oldestKey = rateLimitMap.keys().next().value;
+      if (oldestKey) {
+        rateLimitMap.delete(oldestKey);
+      }
+    }
     record = { count: 0, resetTime: now + windowMs };
   }
 
   record.count++;
+
+  // Update map (maintains insertion order for LRU-like eviction on new entries)
+  rateLimitMap.delete(ip);
   rateLimitMap.set(ip, record);
 
-  // Allow 50 requests per minute per IP. Clean up old entries periodically.
+  // Allow 50 requests per minute per IP.
   if (record.count > 50) {
     return res.status(429).json({ error: 'Too many requests, please try again later.' });
   }
