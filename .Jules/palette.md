@@ -9,3 +9,7 @@
 ## 2024-10-01 - Avoid Overriding Text with aria-label
 **Learning:** Adding `aria-label` to buttons that contain visible text and dynamic content (e.g., a notification badge) causes screen readers to completely ignore the inner text. This is a severe accessibility regression rather than an improvement.
 **Action:** Only apply `aria-label` to genuinely icon-only interactive elements. For elements with visible text, rely on their semantic content and avoid redundant or overriding labels unless providing necessary supplementary context (e.g., `aria-describedby`).
+
+## 2024-10-25 - ARIA Tablist Roles for Tabbed Navigation
+**Learning:** Found navigation buttons styled as a tab bar that did not have semantic tablist roles, meaning screen reader users could not understand the relationship between the buttons or which content area they controlled.
+**Action:** Always wrap tab-style navigation groups with `role="tablist"` and give individual tabs `role="tab"`, `aria-selected`, and `aria-controls` pointing to their respective `role="tabpanel"` elements.

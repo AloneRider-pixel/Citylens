@@ -79,10 +79,14 @@ export const LandmarkHistoryView: React.FC<LandmarkHistoryViewProps> = React.mem
       <RealtimeWeatherWidget recognition={recognition} />
 
       {/* Navigation tabs */}
-      <div className="flex border-b border-slate-200 dark:border-slate-800 px-6 bg-slate-50/50 dark:bg-slate-950/40 gap-6 text-sm font-medium overflow-x-auto">
+      <div role="tablist" aria-label="Landmark history sections" className="flex border-b border-slate-200 dark:border-slate-800 px-6 bg-slate-50/50 dark:bg-slate-950/40 gap-6 text-sm font-medium overflow-x-auto">
         <button
+          role="tab"
+          aria-selected={activeTab === 'overview'}
+          aria-controls="tabpanel-overview"
+          id="tab-overview"
           onClick={() => setActiveTab('overview')}
-          className={`py-3.5 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+          className={`py-3.5 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
             activeTab === 'overview'
               ? 'border-amber-600 dark:border-amber-400 text-amber-700 dark:text-amber-400 font-bold'
               : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -93,8 +97,12 @@ export const LandmarkHistoryView: React.FC<LandmarkHistoryViewProps> = React.mem
         </button>
 
         <button
+          role="tab"
+          aria-selected={activeTab === 'timeline'}
+          aria-controls="tabpanel-timeline"
+          id="tab-timeline"
           onClick={() => setActiveTab('timeline')}
-          className={`py-3.5 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+          className={`py-3.5 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
             activeTab === 'timeline'
               ? 'border-amber-600 dark:border-amber-400 text-amber-700 dark:text-amber-400 font-bold'
               : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -108,8 +116,12 @@ export const LandmarkHistoryView: React.FC<LandmarkHistoryViewProps> = React.mem
         </button>
 
         <button
+          role="tab"
+          aria-selected={activeTab === 'secrets'}
+          aria-controls="tabpanel-secrets"
+          id="tab-secrets"
           onClick={() => setActiveTab('secrets')}
-          className={`py-3.5 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+          className={`py-3.5 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
             activeTab === 'secrets'
               ? 'border-amber-600 dark:border-amber-400 text-amber-700 dark:text-amber-400 font-bold'
               : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -123,8 +135,12 @@ export const LandmarkHistoryView: React.FC<LandmarkHistoryViewProps> = React.mem
         </button>
 
         <button
+          role="tab"
+          aria-selected={activeTab === 'sources'}
+          aria-controls="tabpanel-sources"
+          id="tab-sources"
           onClick={() => setActiveTab('sources')}
-          className={`py-3.5 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+          className={`py-3.5 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
             activeTab === 'sources'
               ? 'border-amber-600 dark:border-amber-400 text-amber-700 dark:text-amber-400 font-bold'
               : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -142,7 +158,7 @@ export const LandmarkHistoryView: React.FC<LandmarkHistoryViewProps> = React.mem
       <div className="p-6 sm:p-8">
         {/* Tab 1: Overview & Inception */}
         {activeTab === 'overview' && (
-          <div className="space-y-6 max-w-4xl">
+          <div role="tabpanel" id="tabpanel-overview" aria-labelledby="tab-overview" className="space-y-6 max-w-4xl">
             <div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">The Origin Story</h3>
               <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-sm sm:text-base font-serif">
@@ -186,7 +202,7 @@ export const LandmarkHistoryView: React.FC<LandmarkHistoryViewProps> = React.mem
 
         {/* Tab 2: Historical Timeline */}
         {activeTab === 'timeline' && (
-          <div className="relative pl-6 sm:pl-8 border-l-2 border-amber-400/80 dark:border-amber-500/60 space-y-8 max-w-3xl">
+          <div role="tabpanel" id="tabpanel-timeline" aria-labelledby="tab-timeline" className="relative pl-6 sm:pl-8 border-l-2 border-amber-400/80 dark:border-amber-500/60 space-y-8 max-w-3xl">
             {history.historicalTimeline.map((item, idx) => (
               <div key={idx} className="relative group">
                 {/* Node icon */}
@@ -216,7 +232,7 @@ export const LandmarkHistoryView: React.FC<LandmarkHistoryViewProps> = React.mem
 
         {/* Tab 3: Hidden Secrets & Unknown Trivia */}
         {activeTab === 'secrets' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div role="tabpanel" id="tabpanel-secrets" aria-labelledby="tab-secrets" className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {history.hiddenSecrets.map((secret, idx) => (
               <div
                 key={idx}
@@ -243,7 +259,7 @@ export const LandmarkHistoryView: React.FC<LandmarkHistoryViewProps> = React.mem
 
         {/* Tab 4: Google Search Citations */}
         {activeTab === 'sources' && (
-          <div className="space-y-4 max-w-2xl">
+          <div role="tabpanel" id="tabpanel-sources" aria-labelledby="tab-sources" className="space-y-4 max-w-2xl">
             <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               <span>Grounded via Google Search live web index</span>
