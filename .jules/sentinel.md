@@ -22,3 +22,13 @@
 **Vulnerability:** The IP-based rate limiter middleware was placed *after* the `express.json({ limit: '25mb' })` payload parser. An attacker could bypass the intended CPU protection by flooding the server with massive 25MB payloads. Node.js would buffer and parse these large payloads in memory *before* checking the rate limit, leading to trivial CPU and memory exhaustion (DoS).
 **Learning:** Middleware execution order is critical for security. Security controls (like rate limiters and IP blocklists) must execute as early as possible in the request lifecycle. Placing them after expensive operations (like large body parsing, file uploads, or complex routing) renders them ineffective against resource exhaustion attacks.
 **Prevention:** Always mount rate-limiting middleware *before* payload parsers (e.g., `express.json()`, `express.urlencoded()`, or `multer()`) to immediately reject abusive traffic before the server expends resources processing the request body.
+
+## 2026-10-12 - [Strict In-Memory Rate Limiter Bounds]
+**Vulnerability:** The application stored client IP blocks in an unbounded . An attacker could spoof an enormous number of distinct IP addresses, indefinitely expanding the Map size and causing the Node.js process to crash due to an Out of Memory (OOM) error (a DoS attack).
+**Learning:** Relying on periodic  cleanup is insufficient against high-velocity automated attacks. Unbounded memory allocations directly tied to untrusted user input (like `req.ip`) are a critical attack vector.
+**Prevention:** Always strictly bound the maximum size of any in-memory data structure (e.g., rate limiters, session stores) using an eviction policy (like LRU) before inserting new entries.
+
+## 2024-05-24 - [Strict In-Memory Rate Limiter Bounds]
+**Vulnerability:** The application stored client IP blocks in an unbounded `Map`. An attacker could spoof an enormous number of distinct IP addresses, indefinitely expanding the Map size and causing the Node.js process to crash due to an Out of Memory (OOM) error (a DoS attack).
+**Learning:** Relying on periodic `setInterval` cleanup is insufficient against high-velocity automated attacks. Unbounded memory allocations directly tied to untrusted user input (like `req.ip`) are a critical attack vector.
+**Prevention:** Always strictly bound the maximum size of any in-memory data structure (e.g., rate limiters, session stores) using an eviction policy (like LRU) before inserting new entries.
