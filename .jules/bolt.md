@@ -13,3 +13,6 @@
 ## 2025-03-01 - Optimization of high-frequency mouse events in ARViewfinder
 **Learning:** High-frequency input events like `mousemove` triggering React state updates (`setState`) in complex components cause significant layout thrashing and performance bottlenecks, as the entire component tree re-renders on every pixel move.
 **Action:** Replaced the `tilt` state with a `useRef` pointing to the parallax container, and updated the DOM directly via `parallaxRef.current.style.transform` inside the event handler. This bypasses the React render cycle completely for hover effects, ensuring smooth 60fps performance without re-rendering the heavy AR component.
+## 2024-10-24 - O(1) Lookups for High-Frequency VR Orientation
+**Learning:** In React components handling high-frequency updates like VR device orientation or rapid state changes (e.g., `VRPanoramaViewer`), using `Array.prototype.find()` with instantiated arrays or geometric boundary searches creates unnecessary O(n) overhead and blocks the main thread.
+**Action:** Replace O(n) array instantiations and geometric boundary searches with O(1) direct mathematical lookups (e.g., using integer division or modulo) to eliminate garbage collection overhead and improve rendering performance during rapid events.
