@@ -15,6 +15,11 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 3000;
 
+// Security enhancement: trust proxy only in production to prevent IP spoofing
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 app.disable('x-powered-by');
 
 // Security enhancement: Add essential security headers
@@ -31,6 +36,8 @@ app.use((req, res, next) => {
 // Otherwise, an attacker can bypass CPU/memory protections by sending 25MB payloads,
 // causing Node to buffer and parse massive JSON objects before the rate limit is checked.
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const MAX_RATE_LIMIT_ENTRIES = 10000;
+
 app.use('/api', (req, res, next) => {
   const ip = req.ip || req.socket.remoteAddress || 'unknown';
   const now = Date.now();
@@ -42,9 +49,20 @@ app.use('/api', (req, res, next) => {
   }
 
   record.count++;
+
+  // LRU strategy: delete before setting so the key moves to the end of the Map iterator
+  rateLimitMap.delete(ip);
   rateLimitMap.set(ip, record);
 
-  // Allow 50 requests per minute per IP. Clean up old entries periodically.
+  // Bound the map size to prevent OOM DoS
+  if (rateLimitMap.size > MAX_RATE_LIMIT_ENTRIES) {
+    const oldestKey = rateLimitMap.keys().next().value;
+    if (oldestKey !== undefined) {
+      rateLimitMap.delete(oldestKey);
+    }
+  }
+
+  // Allow 50 requests per minute per IP.
   if (record.count > 50) {
     return res.status(429).json({ error: 'Too many requests, please try again later.' });
   }
