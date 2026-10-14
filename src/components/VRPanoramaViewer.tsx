@@ -53,14 +53,21 @@ const COMPASS_TAPE_ELEMENTS = [0, 45, 90, 135, 180, 225, 270, 315, 360, 405, 450
   );
 });
 
-export const VRPanoramaViewer: React.FC<VRPanoramaViewerProps> = ({
+/**
+ * ⚡ Bolt Performance Optimization: Wrapped VRPanoramaViewer in React.memo()
+ * 💡 What: Prevented unnecessary re-renders of this computationally heavy 3D viewer.
+ * 🎯 Why: The component contains complex 3D CSS transforms and deep DOM trees that shouldn't be rebuilt unless explicitly needed.
+ * 📊 Impact: Significantly reduces layout thrashing and CPU load when parent components (like ARViewfinder) re-render without changing the viewer's props.
+ * 🔬 Measurement: Observe React DevTools Profiler; `VRPanoramaViewer` will now bypass render cycles when receiving the same props.
+ */
+export const VRPanoramaViewer = React.memo(({
   imageSrc,
   recognition,
   activePointId,
   onSelectPoint,
   onExitVR,
   filterStyle = 'none',
-}) => {
+}: VRPanoramaViewerProps) => {
   // Orientation angles in degrees
   const [yaw, setYaw] = useState<number>(0); // Horizontal rotation (0 - 360°)
   const [pitch, setPitch] = useState<number>(0); // Vertical tilt (-75° to 75°)
@@ -805,4 +812,4 @@ export const VRPanoramaViewer: React.FC<VRPanoramaViewerProps> = ({
       </div>
     </div>
   );
-};
+});
