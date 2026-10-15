@@ -18,6 +18,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { KeyFocalPoint, LandmarkRecognitionResult } from '../types';
+import { getCompassHeadingText } from '../utils/compass';
 
 interface VRPanoramaViewerProps {
   imageSrc: string;
@@ -53,10 +54,6 @@ const COMPASS_TAPE_ELEMENTS = [0, 45, 90, 135, 180, 225, 270, 315, 360, 405, 450
   );
 });
 
-const CARDINAL_DIRECTIONS = [
-  'N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
-  'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'
-];
 
 export const VRPanoramaViewer: React.FC<VRPanoramaViewerProps> = ({
   imageSrc,
@@ -278,18 +275,7 @@ export const VRPanoramaViewer: React.FC<VRPanoramaViewerProps> = ({
   }, [yaw, pitch, spatialPoints]);
 
   // Compass Heading calculation and Cardinal text
-  const getCompassHeadingText = (heading: number) => {
-    // Math.round to integer, mod 360 ensures 0-359 range
-    const deg = Math.round((heading % 360 + 360) % 360);
-    // Divide by 22.5 to map to 16-point wind rose
-    const val = Math.floor((deg / 22.5) + 0.5);
-    // Map val to index (0-15) array bound wrapping
-    return `${deg}° ${CARDINAL_DIRECTIONS[(val % 16)]}`;
-  };
-
-  const getTagBadge = (type: string) => {
-    switch (type) {
-      case 'architectural':
+  const getCompassHeadingTe  // Compass heading formatter is pure and boundary-tested in src/utils/compass.ts.hitectural':
         return { label: 'Arch Detail', icon: Layers, color: 'bg-cyan-500 text-slate-950' };
       case 'historical':
         return { label: 'Historical', icon: Shield, color: 'bg-amber-500 text-slate-950' };
