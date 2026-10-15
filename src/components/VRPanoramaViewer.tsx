@@ -274,8 +274,11 @@ export const VRPanoramaViewer: React.FC<VRPanoramaViewerProps> = ({
     }
   }, [yaw, pitch, spatialPoints]);
 
-  // Compass Heading calculation and Cardinal text
-  const getCompassHeadingTe  // Compass heading formatter is pure and boundary-tested in src/utils/compass.ts.hitectural':
+  // Compass heading formatter is pure and boundary-tested in src/utils/compass.ts.
+
+  const getTagBadge = (type: string) => {
+    switch (type) {
+      case 'architectural':
         return { label: 'Arch Detail', icon: Layers, color: 'bg-cyan-500 text-slate-950' };
       case 'historical':
         return { label: 'Historical', icon: Shield, color: 'bg-amber-500 text-slate-950' };
