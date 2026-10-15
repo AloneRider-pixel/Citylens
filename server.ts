@@ -17,6 +17,10 @@ const PORT = 3000;
 
 app.disable('x-powered-by');
 
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // Security enhancement: Add essential security headers
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -37,12 +41,24 @@ app.use('/api', (req, res, next) => {
   const windowMs = 60 * 1000; // 1 minute window
 
   let record = rateLimitMap.get(ip);
+
+  if (record) {
+    rateLimitMap.delete(ip);
+  }
+
   if (!record || now > record.resetTime) {
     record = { count: 0, resetTime: now + windowMs };
   }
 
   record.count++;
   rateLimitMap.set(ip, record);
+
+  if (rateLimitMap.size > 10000) {
+    const oldestKey = rateLimitMap.keys().next().value;
+    if (oldestKey !== undefined) {
+      rateLimitMap.delete(oldestKey);
+    }
+  }
 
   // Allow 50 requests per minute per IP. Clean up old entries periodically.
   if (record.count > 50) {
