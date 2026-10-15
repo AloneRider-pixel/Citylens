@@ -104,6 +104,7 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
         <div
           role="button"
           tabIndex={0}
+          aria-label="Snap photo with camera"
           onClick={onOpenCamera}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -138,6 +139,7 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
         <div
           role="button"
           tabIndex={0}
+          aria-label="Upload city photo from device"
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -201,7 +203,7 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
             <button
               key={landmark.id}
               type="button"
-              title={`Test recognition with preset image of ${landmark.name}`}
+              aria-label={`Test recognition with preset image of ${landmark.name}`}
               onClick={() => onPhotoSelected(landmark.thumbnail, landmark)}
               className="group text-left bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-slate-400 dark:hover:border-amber-500/60 hover:shadow-md focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-500 transition-all cursor-pointer flex flex-col"
             >

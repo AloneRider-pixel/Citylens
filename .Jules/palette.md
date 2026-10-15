@@ -13,3 +13,7 @@
 ## 2024-10-06 - Enhance drag-and-drop feedback and fix ARIA text overrides
 **Learning:** Found that some buttons with visible text or dynamic content had `aria-label` attributes, which overrides the inner DOM content for screen readers. In addition, providing clear visual and textual feedback during drag-and-drop interactions enhances user experience significantly.
 **Action:** Always verify that `aria-label` is not used to override rich inner DOM text unless providing supplementary context. Add dynamic text cues during state changes, such as 'Drop Photo Here!' when dragging a file.
+
+## 2024-10-06 - Rejected UX Change: Replacing aria-label with title
+**Learning:** Replacing explicit accessible names (`aria-label`) with `title` attributes on interactive elements (like image buttons) can remove dependable accessible names for some controls and negatively impact screen reader users.
+**Action:** Do not use `title` as a replacement for explicit accessible names like `aria-label` without ensuring robust accessible names remain verified.
