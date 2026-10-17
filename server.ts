@@ -399,6 +399,9 @@ Return ONLY valid JSON matching this schema:
         if (chunk.web&& chunk.web!.uri) {
           try {
             const urlObj = new URL(chunk.web!.uri);
+            if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+              continue;
+            }
             const title = chunk.web!.title || urlObj.hostname.replace('www.', '');
             // Avoid duplicate URLs
             if (!searchSources.some((s) => s.url === chunk.web!.uri)) {
