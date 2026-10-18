@@ -45,12 +45,16 @@ export const ShareTourModal: React.FC<ShareTourModalProps> = ({
   const shareUrl = (() => {
     try {
       const url = new URL(window.location.href);
+      // Security enhancement: Validate protocol to prevent DOM XSS via window.location.href
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+        return 'https://citylens.app';
+      }
       url.searchParams.set('landmark', recognition.landmarkName);
       url.searchParams.set('city', recognition.city);
       url.searchParams.set('country', recognition.country);
       return url.toString();
     } catch {
-      return window.location.href;
+      return 'https://citylens.app';
     }
   })();
 
