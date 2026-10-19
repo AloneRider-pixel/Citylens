@@ -17,3 +17,7 @@
 ## 2025-03-01 - Optimization of compass heading calculations in VRPanoramaViewer
 **Learning:** Instantiating large arrays and performing O(n) `.find()` boundary searches within functions called during high-frequency render loops (e.g., tied to device orientation or 60fps animations) causes significant garbage collection overhead and drops frames.
 **Action:** Replaced O(n) boundary searches with O(1) direct mathematical lookups (e.g., using modulo and integer division) and moved static array definitions outside the component to eliminate repeated memory allocation.
+
+## 2024-05-19 - Memoizing Score Calculation in LandmarkChallengeQuiz
+**Learning:** In a React application, performing `Array.prototype.reduce()` on every render to calculate derived state from an array (like a quiz score based on answers) introduces redundant O(n) computations. While this overhead is small for a short quiz, it is an anti-pattern that can scale poorly if the component re-renders frequently or if the array size grows. Furthermore, duplicating this calculation logic (once for rendering the score, once in an event handler) increases maintenance overhead.
+**Action:** Always wrap computationally derived state from arrays (such as `.reduce()`, `.map()`, or `.filter()`) using the `useMemo` hook with proper dependency tracking. This ensures the calculation only runs when the underlying array (or dependencies) actually change, completely eliminating O(n) re-evaluation overhead during unrelated renders.
