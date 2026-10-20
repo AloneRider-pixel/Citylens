@@ -521,7 +521,11 @@ app.post('/api/weather', async (req, res) => {
 
     try {
       const openMeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m&daily=sunrise,sunset,uv_index_max&timezone=auto`;
-      const response = await fetch(openMeteoUrl);
+      // Security enhancement: Add a 3000ms timeout to the external fetch to prevent hanging requests from exhausting server connections
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const response = await fetch(openMeteoUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (response.ok) {
         weatherData = await response.json();
       }
