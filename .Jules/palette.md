@@ -12,3 +12,7 @@
 ## 2024-03-20 - Dynamic Drag-and-Drop Feedback
 **Learning:** During file upload interactions, retaining generic placeholder text (like "Upload City Photo") while the user is actively dragging a file over a dropzone causes cognitive friction. Without explicit textual confirmation, users may feel uncertain if the dropzone is active.
 **Action:** When a `dragover` event is active, immediately substitute the primary call-to-action text with direct instructional feedback (e.g., "Drop Photo Here!") to provide absolute clarity that the drop action will be successfully captured.
+
+## 2024-10-02 - Missing Accessible Tab Navigation
+**Learning:** Found custom tab navigation elements built with generic `div` containers and `button` tags that lacked proper `role="tablist"`, `role="tab"`, and `aria-selected` attributes. This made it impossible for screen reader users to understand the grouping of tabs or identify which tab was currently active.
+**Action:** Always ensure custom tab components use the correct ARIA semantics: `role="tablist"` on the container, and `role="tab"` with a dynamic `aria-selected` state on individual tab buttons to provide proper context and feedback to assistive technologies.

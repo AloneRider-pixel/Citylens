@@ -79,8 +79,13 @@ export const LandmarkHistoryView: React.FC<LandmarkHistoryViewProps> = React.mem
       <RealtimeWeatherWidget recognition={recognition} />
 
       {/* Navigation tabs */}
-      <div className="flex border-b border-slate-200 dark:border-slate-800 px-6 bg-slate-50/50 dark:bg-slate-950/40 gap-6 text-sm font-medium overflow-x-auto">
+      <div
+        role="tablist"
+        className="flex items-center gap-1 sm:gap-6 px-4 sm:px-8 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-x-auto scrollbar-none text-xs sm:text-sm font-medium"
+      >
         <button
+          role="tab"
+          aria-selected={activeTab === 'overview'}
           onClick={() => setActiveTab('overview')}
           className={`py-3.5 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
             activeTab === 'overview'
@@ -93,6 +98,8 @@ export const LandmarkHistoryView: React.FC<LandmarkHistoryViewProps> = React.mem
         </button>
 
         <button
+          role="tab"
+          aria-selected={activeTab === 'timeline'}
           onClick={() => setActiveTab('timeline')}
           className={`py-3.5 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
             activeTab === 'timeline'
@@ -108,6 +115,8 @@ export const LandmarkHistoryView: React.FC<LandmarkHistoryViewProps> = React.mem
         </button>
 
         <button
+          role="tab"
+          aria-selected={activeTab === 'secrets'}
           onClick={() => setActiveTab('secrets')}
           className={`py-3.5 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
             activeTab === 'secrets'
@@ -123,6 +132,8 @@ export const LandmarkHistoryView: React.FC<LandmarkHistoryViewProps> = React.mem
         </button>
 
         <button
+          role="tab"
+          aria-selected={activeTab === 'sources'}
           onClick={() => setActiveTab('sources')}
           className={`py-3.5 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
             activeTab === 'sources'
