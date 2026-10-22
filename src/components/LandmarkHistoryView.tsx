@@ -79,10 +79,7 @@ export const LandmarkHistoryView: React.FC<LandmarkHistoryViewProps> = React.mem
       <RealtimeWeatherWidget recognition={recognition} />
 
       {/* Navigation tabs */}
-      <div
-        role="tablist"
-        className="flex items-center gap-1 sm:gap-6 px-4 sm:px-8 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-x-auto scrollbar-none text-xs sm:text-sm font-medium"
-      >
+      <div role="tablist" className="flex border-b border-slate-200 dark:border-slate-800 px-6 bg-slate-50/50 dark:bg-slate-950/40 gap-6 text-sm font-medium overflow-x-auto">
         <button
           role="tab"
           aria-selected={activeTab === 'overview'}
