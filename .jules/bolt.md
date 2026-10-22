@@ -17,3 +17,7 @@
 ## 2025-03-01 - Optimization of compass heading calculations in VRPanoramaViewer
 **Learning:** Instantiating large arrays and performing O(n) `.find()` boundary searches within functions called during high-frequency render loops (e.g., tied to device orientation or 60fps animations) causes significant garbage collection overhead and drops frames.
 **Action:** Replaced O(n) boundary searches with O(1) direct mathematical lookups (e.g., using modulo and integer division) and moved static array definitions outside the component to eliminate repeated memory allocation.
+
+## 2025-03-01 - Optimization of quiz score calculation in LandmarkChallengeQuiz
+**Learning:** Recomputing scores via array `reduce()` inside a component's render body causes redundant O(n) calculations on every single render. This is especially problematic in interactive components (like quizzes) where frequent state changes (e.g., ticking clocks or hover states) trigger constant re-renders even when the answers haven't changed.
+**Action:** Replaced the inline `calculateScore` function with a `useMemo` hook (`finalCalculatedScore`) that depends only on `userAnswers` and `questions`. This ensures the reduction logic only runs when the answers actually change, saving computation cycles during idle UI updates.

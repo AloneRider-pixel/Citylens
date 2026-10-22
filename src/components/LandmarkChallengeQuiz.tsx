@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import confetti from 'canvas-confetti';
 import {
   Award,
@@ -114,11 +114,11 @@ export const LandmarkChallengeQuiz: React.FC<LandmarkChallengeQuizProps> = React
     }
   };
 
-  const calculateScore = () => {
+  const finalCalculatedScore = useMemo(() => {
     return userAnswers.reduce((score: number, ans, idx) => {
       return (score || 0) + (ans === questions[idx]?.correctAnswerIndex ? 1 : 0);
     }, 0);
-  };
+  }, [userAnswers, questions]);
 
   const getRankBadge = (score: number) => {
     if (score === 3) {
@@ -230,7 +230,7 @@ export const LandmarkChallengeQuiz: React.FC<LandmarkChallengeQuizProps> = React
           /* Completed Score Screen */
           <div className="py-6 max-w-2xl mx-auto space-y-6">
             {(() => {
-              const score = calculateScore();
+              const score = finalCalculatedScore;
               const rank = getRankBadge(score);
               const RankIcon = rank.icon;
 
