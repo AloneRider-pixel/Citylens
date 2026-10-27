@@ -276,12 +276,14 @@ export default function App() {
   };
 
   const handleDeleteTour = async (id: string) => {
-    const filtered = savedTours.filter((t) => t.id !== id);
-    setSavedTours(filtered);
-    try {
-      await tourCacheDB.deleteTour(id);
-    } catch (e) {
-      console.warn('Failed to delete tour from cache:', e);
+    if (confirm('Are you sure you want to remove this landmark from your passport?')) {
+      const filtered = savedTours.filter((t) => t.id !== id);
+      setSavedTours(filtered);
+      try {
+        await tourCacheDB.deleteTour(id);
+      } catch (e) {
+        console.warn('Failed to delete tour from cache:', e);
+      }
     }
   };
 
