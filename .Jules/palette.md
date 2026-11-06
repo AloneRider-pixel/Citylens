@@ -12,3 +12,7 @@
 ## 2024-03-20 - Dynamic Drag-and-Drop Feedback
 **Learning:** During file upload interactions, retaining generic placeholder text (like "Upload City Photo") while the user is actively dragging a file over a dropzone causes cognitive friction. Without explicit textual confirmation, users may feel uncertain if the dropzone is active.
 **Action:** When a `dragover` event is active, immediately substitute the primary call-to-action text with direct instructional feedback (e.g., "Drop Photo Here!") to provide absolute clarity that the drop action will be successfully captured.
+
+## 2024-10-24 - Explicit ARIA Labels for Highly Condensed Text Buttons
+**Learning:** Found instances where buttons contained visible text, but the text was so highly condensed and technical (e.g., 'Laser', 'HUD') that it lacked sufficient context to explain the action when read out of sequence by a screen reader. A screen reader announcing just "Laser button" is ambiguous.
+**Action:** When a button's visible text is extremely brief or technical and lacks action context, apply an explicit `aria-label` (e.g., `aria-label="Toggle Scanning Laser"`) and pair it with `aria-pressed` for toggle states, to provide screen reader users with the full contextual action, despite the memory rule generally advising against overriding visible text.

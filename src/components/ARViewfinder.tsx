@@ -296,7 +296,9 @@ export const ARViewfinder: React.FC<ARViewfinderProps> = ({
           {/* Quick Laser Toggle */}
           <button
             onClick={() => setShowLaser(!showLaser)}
-            className={`p-1.5 rounded-lg border text-[11px] transition-colors ${
+            aria-pressed={showLaser}
+            aria-label="Toggle Scanning Laser"
+            className={`p-1.5 rounded-lg border text-[11px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
               showLaser
                 ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
                 : 'bg-slate-800 border-slate-700 text-slate-400'
@@ -309,7 +311,9 @@ export const ARViewfinder: React.FC<ARViewfinderProps> = ({
           {/* HUD Toggle */}
           <button
             onClick={() => setShowHUD(!showHUD)}
-            className={`p-1.5 rounded-lg border text-[11px] transition-colors ${
+            aria-pressed={showHUD}
+            aria-label="Toggle AR Overlay Elements"
+            className={`p-1.5 rounded-lg border text-[11px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
               showHUD
                 ? 'bg-slate-800 border-slate-700 text-slate-200'
                 : 'bg-slate-900 border-slate-800 text-slate-500'
