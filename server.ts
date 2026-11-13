@@ -1,4 +1,5 @@
 import express from 'express';
+import { rateLimit } from 'express-rate-limit';
 import path from 'path';
 import dotenv from 'dotenv';
 import { GoogleGenAI, Modality } from '@google/genai';
@@ -871,7 +872,8 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('/{*splat}', (req, res) => {
+    const spaLimiter = rateLimit({ windowMs: 60 * 1000, limit: 120, standardHeaders: 'draft-8', legacyHeaders: false });
+    app.get('/{*splat}', spaLimiter, (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
