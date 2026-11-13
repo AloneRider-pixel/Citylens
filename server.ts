@@ -1,6 +1,6 @@
 import express from 'express';
+import { rateLimit } from 'express-rate-limit';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { GoogleGenAI, Modality } from '@google/genai';
 import { createServer as createViteServer } from 'vite';
@@ -8,9 +8,6 @@ import { validateImageInput } from './image-validation';
 import { validateLandmarkRecognition } from './server-validation';
 
 dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = 3000;
@@ -875,7 +872,8 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*', (req, res) => {
+    const spaLimiter = rateLimit({ windowMs: 60 * 1000, limit: 120, standardHeaders: 'draft-8', legacyHeaders: false });
+    app.get('/{*splat}', spaLimiter, (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }

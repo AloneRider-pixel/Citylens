@@ -37,3 +37,31 @@ jobs:
         run: pnpm test
       - name: Build
         run: pnpm build
+      - name: Smoke test built production server
+        shell: bash
+        env:
+          NODE_ENV: production
+          GEMINI_API_KEY: ''
+        run: |
+          node dist/server.cjs > /tmp/citylens-production.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          ready=false
+          for i in {1..30}; do
+            if ! kill -0 "$server_pid" 2>/dev/null; then
+              cat /tmp/citylens-production.log
+              exit 1
+            fi
+            if curl --fail --silent http://127.0.0.1:3000/api/health; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          test "$ready" = true || { cat /tmp/citylens-production.log; exit 1; }
+          curl --fail --silent http://127.0.0.1:3000/ | grep -qi '<html'
+          curl --fail --silent http://127.0.0.1:3000/fixture-spa-route | grep -qi '<html'
+          for i in {1..119}; do
+            curl --fail --silent http://127.0.0.1:3000/fixture-spa-route > /tmp/citylens-spa.html
+          done
+          test "$(curl --silent --output /tmp/citylens-rate-limit.txt --write-out '%{http_code}' http://127.0.0.1:3000/fixture-spa-route)" = 429
