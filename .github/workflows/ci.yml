@@ -61,3 +61,7 @@ jobs:
           test "$ready" = true || { cat /tmp/citylens-production.log; exit 1; }
           curl --fail --silent http://127.0.0.1:3000/ | grep -qi '<html'
           curl --fail --silent http://127.0.0.1:3000/fixture-spa-route | grep -qi '<html'
+          for i in {1..119}; do
+            curl --fail --silent http://127.0.0.1:3000/fixture-spa-route > /tmp/citylens-spa.html
+          done
+          test "$(curl --silent --output /tmp/citylens-rate-limit.txt --write-out '%{http_code}' http://127.0.0.1:3000/fixture-spa-route)" = 429
